@@ -1,0 +1,2200 @@
+{
+  "checkedAt": "2026-08-14T00:53:14.313Z",
+  "mappings": [
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "数据科学与分析理学硕士",
+      "programmeId": "polyu-hk-data-science-and-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "经济学（数字经济学）理学硕士",
+      "programmeId": "polyu-hk-economics",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "碳中和可持续技术硕士",
+      "programmeId": "polyu-hk-sustainable-technology-for-carbon-neutrality",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "会计及金融分析理学硕士",
+      "programmeId": "polyu-hk-accounting-and-finance-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "国际航运及物流管理理学硕士学位",
+      "programmeId": "polyu-hk-international-shipping-and-transport-logistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "机械工程理学硕士学位",
+      "programmeId": "polyu-hk-mechanical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "可持续时装及创新文学硕士/深造文凭",
+      "programmeId": "polyu-hk-sustainable-fashion-and-innovation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "量化金融及金融科技理学硕士",
+      "programmeId": "polyu-hk-quantitative-finance-and-fintech",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "会计学理学硕士",
+      "programmeId": "polyu-hk-accountancy",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "电动汽车理学硕士",
+      "programmeId": "polyu-hk-electric-vehicles",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "供应链与物流管理理学硕士/深造文凭",
+      "programmeId": "polyu-hk-international-shipping-and-transport-logistics",
+      "confidence": "low"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "航空工程-航空工程理学硕士",
+      "programmeId": "polyu-hk-aerospace-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "土木工程学理学硕士",
+      "programmeId": "polyu-hk-civil-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "专业英文文学硕士",
+      "programmeId": "polyu-hk-english-studies-for-the-professions",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "微电子与量子系统工程理学硕士",
+      "programmeId": "polyu-hk-microelectronics-and-quantum-systems-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "智能制造理学硕士",
+      "programmeId": "polyu-hk-smart-manufacturing",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "资讯科技理学硕士",
+      "programmeId": "polyu-hk-information-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "中国语言学文学硕士",
+      "programmeId": "polyu-hk-chinese-linguistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "产品开发与分析-机械工程理学硕士",
+      "programmeId": "polyu-hk-mechanical-engineering",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "城市信息学及智慧城市理学硕士",
+      "programmeId": "polyu-hk-urban-informatics-and-smart-cities",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "环境管理及工程学理学硕士",
+      "programmeId": "polyu-hk-environmental-management-and-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "中国文化文学硕士",
+      "programmeId": "polyu-hk-chinese-culture",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "测绘及地理资讯学理学硕士学位 -地理资讯",
+      "programmeId": "polyu-hk-geomatics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "生物医学工程理学硕士",
+      "programmeId": "polyu-hk-biomedical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "区块链科技理学硕士",
+      "programmeId": "polyu-hk-blockchain-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "中英企业传播文学硕士",
+      "programmeId": "polyu-hk-bilingual-corporate-communication",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "工程商业管理理学硕士/深造文凭",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "环球商业及决策分析硕士",
+      "programmeId": "polyu-hk-global-business-and-decision-analysis",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "科技应用数学理学硕士（精算与投资学）",
+      "programmeId": "polyu-hk-actuarial-and-investment-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "翻译与传译文学硕士",
+      "programmeId": "polyu-hk-translation-and-language-technology",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "工业物流系统理学硕士",
+      "programmeId": "polyu-hk-industrial-logistics-systems",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "创新多媒体娱乐理学硕士",
+      "programmeId": "polyu-hk-innovative-multimedia-entertainment",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "全球食品安全管理与风险分析理学硕士",
+      "programmeId": "polyu-hk-global-food-safety-management-and-risk-analysis",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "数据科学及分析专业",
+      "programmeId": "polyu-hk-data-science-and-analytics",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": null,
+      "programmeId": null,
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "金融硕士（投资管理）",
+      "programmeId": "polyu-hk-finance-investment-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "全球供应链管理理学硕士/深造文凭",
+      "programmeId": "polyu-hk-international-shipping-and-transport-logistics",
+      "confidence": "low"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "专业会计硕士",
+      "programmeId": "polyu-hk-accountancy",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "汉语言文学硕士",
+      "programmeId": "polyu-hk-chinese-linguistics",
+      "confidence": "low"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "环球酒店业管理理学硕士",
+      "programmeId": "polyu-hk-global-hospitality-business",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "商业管理理学硕士",
+      "programmeId": "polyu-hk-business-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "应用人工智能计算机硕士",
+      "programmeId": "ntu-master-in-computing-applied-artificial-intelligence",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "供应链工程理学硕士",
+      "programmeId": "ntu-master-of-science-supply-chain-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "智能制造理学硕士",
+      "programmeId": "ntu-master-of-science-smart-manufacturing",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "项目管理理学硕士",
+      "programmeId": "ntu-master-of-science-project-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "绿色电子理学硕士（南洋理工大学-慕尼黑工业大学联合开设）",
+      "programmeId": "ntu-master-of-science-green-electronics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "计算机控制和自动化硕士",
+      "programmeId": "ntu-cca",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "管理经济学理学硕士（中文授课）",
+      "programmeId": "ntu-master-of-science-managerial-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "海事研究理学硕士",
+      "programmeId": "ntu-master-of-science-maritime-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "机械工程理学硕士",
+      "programmeId": "ntu-master-of-science-mechanical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "应用经济学理学硕士",
+      "programmeId": "ntu-master-of-science-applied-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "可持续发展与环境工程理学硕士",
+      "programmeId": "ntu-master-of-science-sustainability-environmental-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "企业人工智能硕士",
+      "programmeId": "ntu-master-of-science-enterprise-artificial-intelligence",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "信号处理与机器学习理学硕士",
+      "programmeId": "ntu-master-of-science-signal-processing-machine-learning",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "笔译与口译文学硕士",
+      "programmeId": "ntu-master-of-arts-nbsp-translation-interpretation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "航空理学硕士",
+      "programmeId": "ntu-master-of-science-aviation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "生物医学数据科学理学硕士",
+      "programmeId": "ntu-master-of-science-biomedical-data-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "集成电路与微电子硕士",
+      "programmeId": "ntu-electronics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "化学建模硕士",
+      "programmeId": "ntu-master-of-science-chemical-modelling",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "化学工程理学硕士",
+      "programmeId": "ntu-master-of-science-chemical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "数据科学理学硕士",
+      "programmeId": "ntu-master-of-science-data-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "商业分析理学硕士",
+      "programmeId": "ntu-master-of-science-business-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "国际关系理学硕士",
+      "programmeId": "ntu-master-of-science-international-relations",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "区块链理学硕士",
+      "programmeId": "ntu-master-of-science-blockchain",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "纳米技术与纳米科学理学硕士",
+      "programmeId": "ntu-master-of-science-nanotechnology-nanoscience",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "分析学理学硕士",
+      "programmeId": "ntu-master-of-science-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "知识管理理学硕士",
+      "programmeId": "ntu-master-of-science-knowledge-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "土木工程理学硕士",
+      "programmeId": "ntu-master-of-science-civil-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "国际政治经济学理学硕士",
+      "programmeId": "ntu-master-of-science-international-political-economy",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "语言学文学硕士",
+      "programmeId": "ntu-master-of-arts-linguistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "国际建筑管理理学硕士",
+      "programmeId": "ntu-master-of-science-international-construction-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "材料科学与工程理学硕士",
+      "programmeId": "ntu-master-of-science-materials-science-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "化学科学与仪器理学硕士",
+      "programmeId": "ntu-master-of-science-chemical-sciences-instrumentation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "人工智能理学硕士",
+      "programmeId": "ntu-master-of-science-artificial-intelligence",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "金融学理学硕士",
+      "programmeId": "ntu-master-of-science-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "管理经济学理学硕士（英文授课）",
+      "programmeId": "ntu-master-of-science-managerial-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "中国与全球治理社会科学硕士",
+      "programmeId": "ntu-master-of-social-sciences-china-global-governance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "应用语言学文学硕士",
+      "programmeId": "ntu-master-of-arts-applied-linguistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "亚洲研究理学硕士",
+      "programmeId": "ntu-master-of-science-asian-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "对外汉语教学文学硕士",
+      "programmeId": "ntu-master-of-arts-in-teaching-chinese-as-an-international-language",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "科技创业与创新理学硕士",
+      "programmeId": "ntu-master-of-science-technopreneurship-innovation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "会计学理学硕士",
+      "programmeId": "ntu-master-of-science-accountancy",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": null,
+      "programmeId": null,
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "金融工程理学硕士",
+      "programmeId": "ntu-master-of-science-financial-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "集成电路设计理学硕士（南洋理工大学-慕尼黑工业大学联合开设）",
+      "programmeId": "ntu-master-of-science-integrated-circuit-design",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "信息研究理学硕士",
+      "programmeId": "ntu-master-of-science-information-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "信息系统理学硕士",
+      "programmeId": "ntu-master-of-science-information-systems",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "航空航天工程理学硕士（慕尼黑工业大学（TUM）联合硕士）",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "ntu",
+      "sourceName": "市场营销学硕士",
+      "programmeId": "ntu-master-of-science-marketing-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "化学与能源工程理学硕士",
+      "programmeId": "hkust-msc-in-chemical-and-energy-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "工程企业管理理学硕士",
+      "programmeId": "hkust-msc-in-engineering-enterprise-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "电信学理学硕士",
+      "programmeId": "hkust-msc-in-telecommunications",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "土木基建工程与管理理学硕士",
+      "programmeId": "hkust-msc-pgd-in-civil-infrastructural-engineering-and-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "经济学理学硕士",
+      "programmeId": "hkust-msc-in-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "航空工程理学硕士",
+      "programmeId": "hkust-msc-in-aeronautical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "环境工程与管理理学硕士",
+      "programmeId": "hkust-msc-pgd-in-environmental-engineering-and-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "集成电路硕士",
+      "programmeId": "hkust-msc-in-integrated-circuits",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "人工智能与创业理学硕士",
+      "programmeId": "hkust-msc-in-ai-and-entrepreneurship",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "信息技术理学硕士",
+      "programmeId": "hkust-msc-in-information-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "信息和网络安全管理理学硕士",
+      "programmeId": "hkust-msc-in-information-and-cyber-security-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "机械工程理学硕士",
+      "programmeId": "hkust-msc-in-mechanical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "国际语言教育文学硕士",
+      "programmeId": "hkust-ma-in-international-language-education",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "数据驱动建模理学硕士",
+      "programmeId": "hkust-msc-in-data-driven-modeling",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "集成电路设计",
+      "programmeId": "hkust-msc-in-integrated-circuits",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "智能建筑物技术与管理理学硕士",
+      "programmeId": "hkust-msc-in-intelligent-building-technology-and-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "红鸟硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "环境健康与安全理学硕士",
+      "programmeId": "hkust-msc-in-environmental-health-and-safety",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "环境科学与管理及可持续发展理学硕士",
+      "programmeId": "hkust-msc-in-environmental-science-management-and-sustainability",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "全球运营理学硕士",
+      "programmeId": "hkust-msc-in-global-operations",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": " 社会科学文学硕士",
+      "programmeId": "hkust-ma-pgd-in-social-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "中国文化文学硕士",
+      "programmeId": "hkust-ma-in-chinese-culture",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "化学与生物分子工程",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "技术领导力与创业理学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "金融数学理学硕士",
+      "programmeId": "hkust-msc-in-financial-mathematics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "会计学理学硕士",
+      "programmeId": "hkust-msc-in-accounting",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": null,
+      "programmeId": null,
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "市场营销理学硕士",
+      "programmeId": "hkust-msc-in-marketing",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "数学教育学理学硕士",
+      "programmeId": "hkust-msc-in-mathematics-for-educators",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hkust",
+      "sourceName": "国际管理理学硕士",
+      "programmeId": "hkust-msc-in-international-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "生物多样性、环境管理、可持续发展与技术理学硕士",
+      "programmeId": "cuhk-msc-in-biodiversity-environmental-management-sustainability-and-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "人工智能与机器人学理学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "地球与环境分析可持续发展理学硕士",
+      "programmeId": "cuhk-msc-in-earth-and-environmental-analytics-for-sustainability",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "机器人理学硕士",
+      "programmeId": "cuhk-msc-in-robotics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "地理信息科学与智慧城市理学硕士",
+      "programmeId": "cuhk-msc-in-geoinformation-science-and-smart-cities",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "金融硕士",
+      "programmeId": "cuhk-msc-in-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "数据科学理学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "社会服务管理文学硕士",
+      "programmeId": "cuhk-ma-in-social-service-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "电子商务和物流技术硕士",
+      "programmeId": "cuhk-msc-in-e-commerce-and-logistics-technologies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "统计与数据科学高级研究理学硕士",
+      "programmeId": "cuhk-msc-in-advanced-studies-in-statistics-and-data-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "中国研究文学硕士",
+      "programmeId": "cuhk-ma-in-chinese-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "翻译学文学硕士",
+      "programmeId": "cuhk-ma-in-translation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "可持续城市规划理学硕士",
+      "programmeId": "cuhk-msc-in-sustainable-urban-planning",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "经济学理学硕士",
+      "programmeId": "cuhk-msc-in-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "会计学理学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "宗教研究硕士",
+      "programmeId": "cuhk-ma-in-religious-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "市场营销理学硕士",
+      "programmeId": "cuhk-msc-in-marketing",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "教育学硕士",
+      "programmeId": "cuhk-master-of-education",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "金融科技理学硕士",
+      "programmeId": "cuhk-msc-in-financial-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "中文语言学与语言习得硕士",
+      "programmeId": "cuhk-ma-in-chinese-linguistics-and-language-acquisition",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "对外英语教学文学硕士",
+      "programmeId": "cuhk-ma-in-teaching-english-to-speakers-of-other-languages",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "信息管理与商业分析理学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "公共卫生理学硕士",
+      "programmeId": "cuhk-master-of-public-health",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "物理学理学硕士",
+      "programmeId": "cuhk-msc-in-physics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "商业分析理学硕士",
+      "programmeId": "cuhk-msc-in-business-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "语言学硕士",
+      "programmeId": "cuhk-ma-in-linguistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "会计学硕士",
+      "programmeId": "cuhk-master-of-accountancy",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "信息工程硕士",
+      "programmeId": "cuhk-ie",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "法律博士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "机械与自动化工程硕士",
+      "programmeId": "cuhk-mae",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "社会学文学硕士",
+      "programmeId": "cuhk-ma-in-sociology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "鉴定化学硕士",
+      "programmeId": "cuhk-msc-in-accreditation-chemistry",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "翻译（笔译／口译）硕士",
+      "programmeId": "cuhk-ma-in-translation",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "系统工程与工程管理硕士",
+      "programmeId": "cuhk-msc-in-systems-engineering-and-engineering-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "国际经济法法律硕士",
+      "programmeId": "cuhk-master-of-laws-in-international-economic-law",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "数学理学硕士",
+      "programmeId": "cuhk-msc-in-mathematics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "信息科学与技术管理硕士",
+      "programmeId": "cuhk-msc-in-information-science-and-technology-management-full-time-mode-only",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "房地产硕士",
+      "programmeId": "cuhk-msc-in-real-estate",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "流行病学和生物统计学理学硕士",
+      "programmeId": "cuhk-msc-in-epidemiology-and-biostatistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "生物医学工程理学硕士",
+      "programmeId": "cuhk-msc-in-biomedical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "可持续旅游社会科学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "全球传播文学硕士",
+      "programmeId": "cuhk-ma-in-global-communication",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "社会政策硕士",
+      "programmeId": "cuhk-ma-in-social-policy",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "英语文学--应用英语语言学硕士",
+      "programmeId": "cuhk-ma-in-english-applied-english-linguistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "营养，食品科学与技术硕士",
+      "programmeId": "cuhk-msc-in-nutrition-food-science-and-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "文化管理文学硕士",
+      "programmeId": "cuhk-ma-in-cultural-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "跨文化研究硕士",
+      "programmeId": "cuhk-ma-in-intercultural-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "普通法法律硕士",
+      "programmeId": "cuhk-master-of-laws-in-common-law",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "基因组学和生物信息学硕士",
+      "programmeId": "cuhk-msc-in-genomics-and-bioinformatics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "管理学硕士",
+      "programmeId": "cuhk-msc-in-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "生物化学和生物医学硕士",
+      "programmeId": "cuhk-msc-in-biochemical-and-biomedical-sciences",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "全球政治经济学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "金融学理学硕士",
+      "programmeId": "cuhk-msc-in-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "大中华地区的政府与政治社会科学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": null,
+      "programmeId": null,
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "新闻学文学硕士",
+      "programmeId": "cuhk-ma-in-journalism",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "公共政策硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "广告社会科学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "比较及公共史学文学硕士",
+      "programmeId": "cuhk-ma-in-comparative-and-public-history",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "企业传播社会科学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "社会工作硕士",
+      "programmeId": "cuhk-master-of-social-work",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "人类学文学硕士",
+      "programmeId": "cuhk-ma-in-anthropology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "新媒体理学硕士",
+      "programmeId": "cuhk-msc-in-new-media",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "中国商法法律硕士",
+      "programmeId": "cuhk-master-of-laws-in-chinese-business-law",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "建筑学硕士",
+      "programmeId": "cuhk-master-of-architecture",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "管理学理学硕士",
+      "programmeId": "cuhk-msc-in-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "金融工程理学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cuhk",
+      "sourceName": "性别研究文学硕士",
+      "programmeId": "cuhk-ma-in-gender-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "供应链管理理学硕士",
+      "programmeId": "nus-master-of-science-supply-chain-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "生物多样性保护与可持续发展理学硕士",
+      "programmeId": "nus-master-of-science-in-biodiversity-conservation-and-sustainability",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "文学研究文学硕士",
+      "programmeId": "nus-master-of-arts-literary-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "环境工程理学硕士",
+      "programmeId": "nus-master-of-science-environmental-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "机械工程理学硕士",
+      "programmeId": "nus-master-of-science-mechanical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "中国文化与语言文学硕士",
+      "programmeId": "nus-master-of-arts-chinese-culture-and-language",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "半导体技术与运作理学硕士",
+      "programmeId": "nus-master-of-science-semiconductor-technology-and-operations",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "应用地理信息系统理学硕士",
+      "programmeId": "nus-master-of-science-applied-geographic-information-systems",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "安全、健康与环境技术理学硕士",
+      "programmeId": "nus-master-of-science-safety-health-environmental-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "项目管理理学硕士",
+      "programmeId": "nus-master-of-science-project-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "材料科学与工程理学硕士",
+      "programmeId": "nus-master-of-science-materials-science-and-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "能源系统理学硕士",
+      "programmeId": "nus-master-of-science-energy-systems",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "金融工程理学硕士",
+      "programmeId": "nus-master-of-science-in-financial-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "可持续发展数据科学理学硕士",
+      "programmeId": "nus-master-of-science-in-data-science-for-sustainability",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "计算机硕士 - 信息系统方向",
+      "programmeId": "nus-master-of-computing-information-systems-specialisation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "可持续发展数据科学硕士",
+      "programmeId": "nus-master-of-science-in-data-science-for-sustainability",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "定量金融理学硕士（新加坡国立大学-上海交通大学联合开设）",
+      "programmeId": "nus-master-of-science-in-quantitative-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "土木工程理学硕士",
+      "programmeId": "nus-master-of-science-civil-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "半导体技术与运营硕士",
+      "programmeId": "nus-master-of-science-semiconductor-technology-and-operations",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "可持续与绿色金融理学硕士",
+      "programmeId": "nus-master-of-science-sustainable-and-green-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "统计学理学硕士",
+      "programmeId": "nus-master-of-science-in-statistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "英语语言与语言学",
+      "programmeId": "nus-master-of-arts-english-language-and-linguistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "化学工程理学硕士",
+      "programmeId": "nus-master-of-science-chemical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "技术与创新管理理学硕士",
+      "programmeId": "nus-master-of-science-management-of-technology-and-innovation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "工业与系统工程理学硕士",
+      "programmeId": "nus-master-of-science-industrial-systems-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "经济学硕士",
+      "programmeId": "nus-master-of-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "化学科学理学硕士",
+      "programmeId": "nus-master-of-science-in-chemical-sciences",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "计算机硕士 - 信息通信安全方向",
+      "programmeId": "nus-master-of-computing-infocomm-security-specialisation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "电子工程理学硕士",
+      "programmeId": "nus-ee",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "企业商业分析科技硕士",
+      "programmeId": "nus-master-of-technology-in-enterprise-business-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "食品科学与人类营养学理学硕士",
+      "programmeId": "nus-master-of-science-in-food-science-and-human-nutrition",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "应用生物医学理学硕士",
+      "programmeId": "nus-master-of-science-in-applied-biomedicine",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "计算机硕士 - 通识方向",
+      "programmeId": "nus-master-of-computing-general-track",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "计算机工程理学硕士 - 计算硬件基础设施方向",
+      "programmeId": "nus-master-of-science-computer-engineering",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "建筑性能与可持续性理学硕士",
+      "programmeId": "nus-master-of-science-building-performance-and-sustainability",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "计算机工程理学硕士 - 通识方向",
+      "programmeId": "nus-master-of-science-computer-engineering",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "生物医学工程理学硕士",
+      "programmeId": "nus-master-of-science-biomedical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "智能产业和数字化转型理学硕士",
+      "programmeId": "nus-master-of-science-smart-industries-and-digital-transformation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "计算机硕士 - 计算机科学方向",
+      "programmeId": "nus-master-of-computing-computer-science-specialisation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "国际事务硕士",
+      "programmeId": "nus-master-in-international-affairs",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "工程设计与创新理学硕士",
+      "programmeId": "nus-master-of-science-engineering-design-innovation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "定量金融理学硕士",
+      "programmeId": "nus-master-of-science-in-quantitative-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "岩土工程硕士",
+      "programmeId": "nus-master-of-science-civil-engineering",
+      "confidence": "low"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": null,
+      "programmeId": null,
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "数据科学与机器学习理学硕士",
+      "programmeId": "nus-master-of-science-in-data-science-and-machine-learning",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "软件工程技术硕士",
+      "programmeId": "nus-master-of-technology-in-software-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "数学理学硕士",
+      "programmeId": "nus-master-of-science-mathematics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "海洋技术硕士",
+      "programmeId": "nus-master-of-science-maritime-technology-and-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "水利工程和水资源管理硕士",
+      "programmeId": "nus-master-of-science-civil-engineering",
+      "confidence": "low"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "城市设计文学硕士",
+      "programmeId": "nus-master-of-arts-urban-design",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "物理学理学硕士",
+      "programmeId": "nus-master-of-science-in-physics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "金融学理学硕士",
+      "programmeId": "nus-master-of-science-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "高级公共行政与管理硕士学位课程 - MPAM",
+      "programmeId": "nus-master-in-public-administration-and-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "会计与财务分析理学硕士",
+      "programmeId": "nus-master-of-science-accounting-and-financial-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "地理空间数据科学理学硕士",
+      "programmeId": "hku-master-of-science-in-geospatial-data-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "工程学理学硕士（创新设计与技术）",
+      "programmeId": "hku-master-of-science-in-engineering-innovative-design-and-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "数字城市管理",
+      "programmeId": "hku-master-of-digital-urban-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "人口与政策分析领域社会科学硕士",
+      "programmeId": "hku-master-of-social-sciences-in-the-field-of-population-and-policy-analysis",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "气候治理与风险管理硕士",
+      "programmeId": "hku-master-of-climate-governance-and-risk-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "微电子科学与技术工程理学硕士",
+      "programmeId": "hku-master-of-science-in-engineering-microelectronics-science-and-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "机器人与智能系统工程理学硕士",
+      "programmeId": "hku-master-of-science-in-engineering-robotics-and-intelligent-systems",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "社会数据分析社会科学硕士",
+      "programmeId": "hku-master-of-social-sciences-in-the-field-of-social-data-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "能源工程硕士",
+      "programmeId": "hku-master-of-science-in-engineering-energy-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "机器人与智能系统硕士",
+      "programmeId": "hku-master-of-science-in-engineering-robotics-and-intelligent-systems",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "土木工程硕士（环境工程方向）",
+      "programmeId": "hku-civil-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "工业工程与物流管理硕士",
+      "programmeId": "hku-master-of-science-in-engineering-industrial-engineering-and-logistics-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "翻译学硕士",
+      "programmeId": "hku-master-of-arts-in-the-field-of-translation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "商业分析硕士",
+      "programmeId": "hku-master-of-science-in-business-analytics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "会计学硕士",
+      "programmeId": "hku-master-of-accounting",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "经济学硕士",
+      "programmeId": "hku-master-of-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "低空科技（工程）理学硕士",
+      "programmeId": "hku-master-of-science-in-engineering-low-altitude-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "英语研究文学硕士",
+      "programmeId": "hku-master-of-arts-in-the-field-of-english-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "对外英语教学（TESOL）硕士",
+      "programmeId": "hku-master-of-arts-in-teaching-english-to-speakers-of-other-languages",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "公共卫生硕士",
+      "programmeId": "hku-master-of-public-health",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "中国语言文学硕士",
+      "programmeId": "hku-master-of-arts-in-the-field-of-chinese-language-and-literature",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "机械工程硕士",
+      "programmeId": "hku-master-of-science-in-engineering-mechanical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "土木工程硕士（通用方向）",
+      "programmeId": "hku-civil-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "土木工程硕士（结构工程方向）",
+      "programmeId": "hku-civil-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "城市研究与住房管理硕士",
+      "programmeId": "hku-master-of-urban-studies-and-housing-management-urban-studies-stream",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "人工智能、伦理与社会文学硕士",
+      "programmeId": "hku-master-of-arts-in-the-field-of-ai-ethics-and-society",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "STEM 教育硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "哲学、政治与经济学文学硕士",
+      "programmeId": "hku-master-of-arts-in-the-field-of-philosophy-politics-and-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "全球管理硕士",
+      "programmeId": "hku-master-of-global-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "市场营销硕士",
+      "programmeId": "hku-master-of-science-in-marketing",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "人工智能理学硕士",
+      "programmeId": "hku-master-of-science-in-artificial-intelligence",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "物理学理学硕士",
+      "programmeId": "hku-master-of-science-in-the-field-of-physics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "语言学文学硕士",
+      "programmeId": "hku-master-of-arts-in-the-field-of-linguistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "金融科技金融硕士",
+      "programmeId": "hku-master-of-finance-in-financial-technology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "交通政策与规划硕士",
+      "programmeId": "hku-master-of-transport-policy-and-planning",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "计算机科学硕士（通用方向）",
+      "programmeId": "hku-master-of-science-in-computer-science-general-stream",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "应用语言学硕士",
+      "programmeId": "hku-master-of-arts-in-applied-linguistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "食品安全和毒理学硕士",
+      "programmeId": "hku-master-of-science-in-the-field-of-food-safety-and-toxicology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "电子商务与互联网计算理学硕士",
+      "programmeId": "hku-master-of-science-in-electronic-commerce-and-internet-computing",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "教育技术领导力-学习技术、设计与领导力理学硕士",
+      "programmeId": "hku-master-of-science-in-technology-design-and-leadership-for-learning",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "统计学硕士",
+      "programmeId": "hku-master-of-statistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "内容与语言整合学习-教育学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "图书馆学-图书馆与信息管理理学硕士",
+      "programmeId": "hku-master-of-science-in-library-and-information-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "金融学硕士",
+      "programmeId": "hku-master-of-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "应用地球科学硕士",
+      "programmeId": "hku-master-of-science-in-the-field-of-applied-geosciences",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "空间科学理学硕士学位",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "法律硕士",
+      "programmeId": "hku-master-of-laws-general-or-with-specialisation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "技术与知识产权法法学硕士",
+      "programmeId": "hku-master-of-laws-in-technology-and-intellectual-property-law",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": null,
+      "programmeId": null,
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "基建工程管理硕士",
+      "programmeId": "hku-master-of-science-in-construction-project-management",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "中文教育硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "普通法硕士",
+      "programmeId": "hku-master-of-common-law",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "建设工程管理硕士",
+      "programmeId": "hku-master-of-science-in-construction-project-management",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "城市规划硕士",
+      "programmeId": "hku-master-of-science-in-urban-planning-urban-and-regional-planning-stream-self-funded-for-all",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "房地产学硕士",
+      "programmeId": "hku-master-of-science-in-real-estate",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "企业和金融法硕士",
+      "programmeId": "hku-master-of-laws-in-corporate-and-financial-law",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "建筑学硕士",
+      "programmeId": "hku-master-of-architecture-design",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "中文教学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "景观建筑学硕士",
+      "programmeId": "hku-master-of-landscape-architecture",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "保护学理学硕士",
+      "programmeId": "hku-master-of-science-in-conservation-conservation-planning-and-management-stream",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "建筑学硕士(设计方向)",
+      "programmeId": "hku-master-of-architecture-design",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "国际与公共事务硕士",
+      "programmeId": "hku-master-of-international-and-public-affairs",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "新闻学硕士",
+      "programmeId": "hku-master-of-journalism",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "hku",
+      "sourceName": "信息技术教育硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "运营与供应链管理理学硕士",
+      "programmeId": "cityu-hk-msc-operations-and-supply-chain-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "能源及环境理学硕士",
+      "programmeId": "cityu-hk-msc-energy-and-environment",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "数据科学理学硕士",
+      "programmeId": "cityu-hk-msc-data-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "管理及创新理学硕士",
+      "programmeId": "cityu-hk-msc-management-and-innovation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "金融工程学理学硕士",
+      "programmeId": "cityu-hk-msc-financial-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "商务资讯系统（智能系统管理方向）理学硕士",
+      "programmeId": "cityu-hk-msc-business-information-systems-management-of-intelligent-systems-stream",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "金融学理学硕士",
+      "programmeId": "cityu-hk-msc-finance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "法学硕士",
+      "programmeId": "cityu-hk-master-of-laws",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "专业会计与企业管治理学硕士",
+      "programmeId": "cityu-hk-msc-professional-accounting-and-corporate-governance",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "国际会计学文学硕士",
+      "programmeId": "cityu-hk-ma-international-accounting",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "建造管理理学硕士",
+      "programmeId": "cityu-hk-msc-construction-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "市场营销学理学硕士",
+      "programmeId": "cityu-hk-msc-marketing",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "创新创业理学硕士",
+      "programmeId": "cityu-hk-msc-venture-creation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "机械工程学理学硕士",
+      "programmeId": "cityu-hk-msc-mechanical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "语言研究文学硕士",
+      "programmeId": "cityu-hk-ma-language-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "应用社会科学文学硕士",
+      "programmeId": "cityu-hk-ma-applied-social-sciences",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "智能半导体制造理学硕士",
+      "programmeId": "cityu-hk-msc-intelligent-semiconductor-manufacturing",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "电子商贸理学硕士",
+      "programmeId": "cityu-hk-msc-electronic-commerce",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "金融数学与统计理学硕士",
+      "programmeId": "cityu-hk-msc-financial-mathematics-and-statistics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "工程管理学理学硕士",
+      "programmeId": "cityu-hk-msc-engineering-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "英语语言文学硕士",
+      "programmeId": "cityu-hk-ma-english-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "数码化转型及科技创新理学硕士",
+      "programmeId": "cityu-hk-msc-digital-transformation-and-technological-innovation",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "土木及建筑工程理学硕士",
+      "programmeId": "cityu-hk-msc-civil-and-architectural-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "传播与新媒体文学硕士",
+      "programmeId": "cityu-hk-ma-communication-and-new-media",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "可持续发展及研究社会科学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "中文文学硕士-中国历史和文化遗产的专业发展方向",
+      "programmeId": "cityu-hk-ma-chinese-and-history",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "计算机科学理学硕士",
+      "programmeId": "cityu-hk-msc-computer-science",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "房屋及都市管理文学硕士",
+      "programmeId": "cityu-hk-ma-housing-and-urban-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "中国语言文学与历史文学硕士",
+      "programmeId": "cityu-hk-ma-chinese-and-history",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "材料工程及纳米科技理学硕士",
+      "programmeId": "cityu-hk-msc-materials-engineering-and-nanotechnology",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "整合营销传播文学硕士",
+      "programmeId": "cityu-hk-ma-integrated-marketing-communication",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "商务资讯系统（金融与智能科技方向）理学硕士",
+      "programmeId": "cityu-hk-msc-business-information-systems-financial-and-intelligent-technology-stream",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "国际研究文学硕士",
+      "programmeId": "cityu-hk-ma-international-studies",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "电子商业及知识管理",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "化学理学硕士",
+      "programmeId": "cityu-hk-msc-chemistry",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "公共政策及管理文学硕士",
+      "programmeId": "cityu-hk-ma-public-policy-and-management",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "生物医学工程理学硕士",
+      "programmeId": "cityu-hk-msc-biomedical-engineering",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "心理学社会科学硕士",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "应用经济学理学硕士",
+      "programmeId": "cityu-hk-msc-applied-economics",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "资讯系统管理",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "创意媒体文学硕士",
+      "programmeId": "cityu-hk-ma-creative-media",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "组织管理学",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "房屋学",
+      "programmeId": null,
+      "confidence": "low"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "创意媒体艺术硕士",
+      "programmeId": "cityu-hk-ma-creative-media",
+      "confidence": "medium"
+    },
+    {
+      "institutionId": "cityu-hk",
+      "sourceName": "工商管理硕士",
+      "programmeId": "cityu-hk-master-of-business-administration",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "nus",
+      "sourceName": "人工智能系统技术硕士",
+      "programmeId": "nus-master-of-technology-in-artificial-intelligence-systems",
+      "confidence": "high"
+    },
+    {
+      "institutionId": "polyu-hk",
+      "sourceName": "电机工程（电力系统）理学硕士",
+      "programmeId": "polyu-ee",
+      "confidence": "high"
+    }
+  ],
+  "usage": [
+    {
+      "institutionId": "polyu-hk",
+      "prompt_tokens": 3068,
+      "completion_tokens": 1212,
+      "total_tokens": 4280,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "institutionId": "ntu",
+      "prompt_tokens": 3925,
+      "completion_tokens": 1451,
+      "total_tokens": 5376,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "institutionId": "hkust",
+      "prompt_tokens": 1794,
+      "completion_tokens": 843,
+      "total_tokens": 2637,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "institutionId": "cuhk",
+      "prompt_tokens": 3844,
+      "completion_tokens": 1851,
+      "total_tokens": 5695,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "institutionId": "nus",
+      "prompt_tokens": 4410,
+      "completion_tokens": 1688,
+      "total_tokens": 6098,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "institutionId": "hku",
+      "prompt_tokens": 5876,
+      "completion_tokens": 1986,
+      "total_tokens": 7862,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "institutionId": "cityu-hk",
+      "prompt_tokens": 2570,
+      "completion_tokens": 1308,
+      "total_tokens": 3878,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "institutionId": "nus",
+      "prompt_tokens": 3633,
+      "completion_tokens": 38,
+      "total_tokens": 3671,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "institutionId": "polyu-hk",
+      "prompt_tokens": 2800,
+      "completion_tokens": 32,
+      "total_tokens": 2832,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    }
+  ]
+}

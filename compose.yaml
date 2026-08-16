@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 4173
+    ports:
+      - "4173:4173"
+    volumes:
+      - ./collector/data:/app/collector/data
+    restart: unless-stopped

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>用户分析看板</title>
+  <link rel="stylesheet" href="analytics.css">
+</head>
+<body>
+  <main>
+    <header class="topbar">
+      <div>
+        <span class="eyebrow">ADMISSION REFERENCE · ADMIN</span>
+        <h1>用户分析看板</h1>
+        <p class="lede">查看申请人背景、分析结果和问卷反馈，用筛选条件寻找可比较的申请样本。</p>
+      </div>
+      <nav class="topbar-actions" aria-label="管理员导航">
+        <a class="active" href="/analytics.html">用户分析</a>
+        <a href="/review.html">案例审核</a>
+        <a href="/">申请分析</a>
+        <button id="logout" type="button">退出管理员</button>
+      </nav>
+    </header>
+
+    <section class="notice">
+      <p>仅管理员可见。记录按分析时间倒序加载，最多显示最近 1000 条；展开记录可以查看完整申请资料和完整分析结果。</p>
+      <button id="refresh" type="button">刷新数据</button>
+    </section>
+
+    <section id="metrics" class="metrics" aria-live="polite"></section>
+
+    <section class="visual-grid">
+      <article class="panel">
+        <header class="panel-heading"><div><span class="eyebrow">APPLICANT MIX</span><h2>申请人本科层次</h2></div><span class="panel-note">当前记录</span></header>
+        <div id="tier-chart" class="bar-chart"></div>
+      </article>
+      <article class="panel">
+        <header class="panel-heading"><div><span class="eyebrow">EXPERIENCE SIGNALS</span><h2>经历覆盖</h2></div><span class="panel-note">填写过的经历</span></header>
+        <div id="experience-chart" class="bar-chart"></div>
+      </article>
+      <article class="panel">
+        <header class="panel-heading"><div><span class="eyebrow">QUESTIONNAIRE</span><h2>问卷回收</h2></div><span class="panel-note">已提交问卷</span></header>
+        <div id="feedback-chart" class="bar-chart"></div>
+      </article>
+    </section>
+
+    <section class="records-section">
+      <header class="section-heading">
+        <div><span class="eyebrow">ANALYSIS RECORDS</span><h2>申请人分析记录</h2></div>
+        <span id="record-count" class="record-count"></span>
+      </header>
+      <form id="filters" class="filters">
+        <label class="filter-search">关键词<input id="query" type="search" placeholder="本科院校、专业或申请方向"></label>
+        <label>本科层次<select id="tier"><option value="">全部层次</option><option value="985">985</option><option value="211">211 / 双一流</option><option value="双非">双非</option><option value="海外本科">海外本科</option><option value="未识别">未识别</option></select></label>
+        <label>成绩制<select id="scale"><option value="">全部成绩制</option><option value="100">百分制</option><option value="4">4.0 GPA</option><option value="5">5.0 GPA</option></select></label>
+        <label>最低成绩<input id="gpa-min" type="number" step="0.01" placeholder="不限"></label>
+        <label>实习<select id="internship"><option value="">不限</option><option value="yes">有</option><option value="no">无</option></select></label>
+        <label>科研<select id="research"><option value="">不限</option><option value="yes">有</option><option value="no">无</option></select></label>
+        <label>问卷<select id="feedback"><option value="">不限</option><option value="yes">已填写</option><option value="no">未填写</option></select></label>
+        <label>分析状态<select id="status"><option value="">全部状态</option><option value="completed">已完成</option><option value="processing">处理中</option><option value="failed">失败</option></select></label>
+      </form>
+      <p id="filter-hint" class="filter-hint"></p>
+      <section id="records" class="records" aria-live="polite"></section>
+    </section>
+  </main>
+  <script type="module" src="analytics.mjs"></script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+{
+  "sources": [
+    {
+      "id": "compassedu-public-cases",
+      "name": "指南者留学公开案例",
+      "enabled": true,
+      "hosts": ["www.compassedu.hk", "m.compassedu.hk", "info.compassedu.hk"],
+      "searchPriority": 1,
+      "ocrFallback": true,
+      "detailRegexes": ["/newst_\\d+$", "/newst/\\d+$", "/article_\\d+$", "/article/\\d+$", "/majr/\\d+$"],
+      "entryRegexes": ["/offers_\\d+$"],
+      "search": {
+        "kind": "compass-index",
+        "baseUrl": "https://www.compassedu.hk",
+        "indexPath": "/offers_hk",
+        "pageParam": "page",
+        "maxPages": 30
+      },
+      "seedUrls": [
+        "https://www.compassedu.hk/offer"
+      ],
+      "fallbackUrls": [
+        "https://www.compassedu.hk/offers_1727",
+        "https://www.compassedu.hk/offers_1728",
+        "https://www.compassedu.hk/offers_1729",
+        "https://www.compassedu.hk/offers_1689",
+        "https://www.compassedu.hk/offers_1690",
+        "https://www.compassedu.hk/offers_1693",
+        "https://m.compassedu.hk/article/10972",
+        "https://m.compassedu.hk/article/11038",
+        "https://m.compassedu.hk/article/10440",
+        "https://m.compassedu.hk/article/8673",
+        "https://m.compassedu.hk/article/8108",
+        "https://m.compassedu.hk/article/4675",
+        "https://m.compassedu.hk/article/10121",
+        "https://m.compassedu.hk/article/8992"
+        ,"https://m.compassedu.hk/article/11403"
+        ,"https://m.compassedu.hk/article/7579"
+        ,"https://m.compassedu.hk/article/8975"
+      ]
+    },
+    {
+      "id": "gaotu-public-cases",
+      "name": "高途公开录取案例",
+      "enabled": false,
+      "hosts": ["liuxue.gaotu.cn"],
+      "searchPriority": 1,
+      "detailRegexes": ["/cgal/\\d+\\.html$"],
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://liuxue.gaotu.cn/cgal/106.html",
+        "https://liuxue.gaotu.cn/cgal/187.html"
+      ]
+    },
+    {
+      "id": "nanxing-public-cases",
+      "name": "Nanxing public admission cases",
+      "enabled": true,
+      "hosts": ["www.nanxingjiaoyu.com", "nanxingjiaoyu.com"],
+      "searchPriority": 0,
+      "detailRegexes": ["/case/\\d+\\.html$"],
+      "paginationRegexes": ["/case/index(?:_\\d+)?\\.html$"],
+      "paginationMaxPages": 5,
+      "paginationStrategy": "next",
+      "seedUrls": [
+        "https://www.nanxingjiaoyu.com/case/",
+        "https://www.nanxingjiaoyu.com/case/index_2.html"
+      ],
+      "fallbackUrls": []
+    },
+    {
+      "id": "ulec-public-cases",
+      "name": "优领公开录取案例",
+      "enabled": true,
+      "hosts": ["ulec.com.cn", "www.ulec.com.cn"],
+      "detailRegexes": ["/posts/[^/]+/?$"],
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://ulec.com.cn/posts/singapore-nus-ntu-cases-2026/",
+        "https://ulec.com.cn/posts/hk-cases-2026-master-overview/"
+      ]
+    },
+    {
+      "id": "study-in-europe-public-cases",
+      "name": "留欧之星公开录取案例",
+      "enabled": true,
+      "hosts": ["m.study-in-europe.net", "www.study-in-europe.net"],
+      "detailRegexes": ["/nd\\.jsp$", "/h-nd-\\d+\\.html$"],
+      "seedUrls": [
+        "https://www.study-in-europe.net/h-nd-650.html"
+      ],
+      "fallbackUrls": [
+        "https://www.study-in-europe.net/h-nd-650.html",
+        "https://m.study-in-europe.net/nd.jsp?id=651&mid=5"
+      ]
+    },
+    {
+      "id": "51liuxue-public-cases",
+      "name": "无忧留学公开案例",
+      "enabled": true,
+      "hosts": ["www.51liuxue.com", "51liuxue.com"],
+      "detailRegexes": ["/c/\\d+\\.shtml$", "/webwyjbinfo/\\d+$"],
+      "seedUrls": [
+        "https://www.51liuxue.com/alfx?page=1",
+        "https://www.51liuxue.com/alfx?page=2",
+        "https://www.51liuxue.com/alfx?page=3"
+      ],
+      "paginationMaxPages": 3,
+      "acceptInstitutionOnly": true,
+      "fallbackUrls": []
+    },
+    {
+      "id": "thinkwithu-public-cases",
+      "name": "申友留学公开案例",
+      "enabled": true,
+      "hosts": ["m.thinkwithu.com", "www.thinkwithu.com"],
+      "detailRegexes": ["/case-smart/details/\\d+\\.html$"],
+      "seedUrls": [
+        "https://m.thinkwithu.com/case.html"
+      ],
+      "fallbackUrls": []
+    },
+    {
+      "id": "eic-public-cases",
+      "name": "启德留学公开案例",
+      "enabled": true,
+      "hosts": ["www.eic.org.cn", "eic.org.cn"],
+      "searchPriority": 1,
+      "detailRegexes": ["/case/detail/[a-f0-9]+$", "/caseNew/detail/\\d+$"],
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://www.eic.org.cn/case/detail/7b169673281f4810b9c529fe73b00c7c"
+      ]
+    },
+    {
+      "id": "xdf-public-cases",
+      "name": "新东方公开案例",
+      "enabled": true,
+      "hosts": ["liuxue.xdf.cn"],
+      "allowSparseDetail": true,
+      "detailRegexes": ["/case/\\d+\\.shtml$", "/blog/(?:case_\\d+|blog_\\d+|[^/]+/case/\\d+|[^/]+/blog/\\d+|[^/]+/\\d+)\\.shtml$"],
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://liuxue.xdf.cn/blog/blog_7996374.shtml"
+        ,"https://liuxue.xdf.cn/case/5690064.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7998507.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7957687.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7824695.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7895695.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_5672058.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7824690.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7871300.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7832149.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7958891.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7892023.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7884258.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7727451.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7959172.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7762575.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7733808.shtml"
+        ,"https://liuxue.xdf.cn/case/5656514.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7661441.shtml"
+        ,"https://liuxue.xdf.cn/blog/shanyalong/blog/4964088.shtml"
+        ,"https://liuxue.xdf.cn/blog/shanyalong/blog/3029166.shtml"
+        ,"https://liuxue.xdf.cn/blog/case_7694158.shtml"
+        ,"https://liuxue.xdf.cn/case/7910237.shtml"
+        ,"https://liuxue.xdf.cn/blog/hanfuyang/case/4718565.shtml"
+      ]
+    },
+    {
+      "id": "sohu-public-cases",
+      "name": "搜狐公开录取案例",
+      "enabled": false,
+      "hosts": ["www.sohu.com", "sohu.com"],
+      "detailRegexes": ["/a/\\d+$"],
+      "seedUrls": [],
+      "fallbackUrls": []
+    },
+    {
+      "id": "eol-public-cases",
+      "name": "教育在线公开录取案例",
+      "enabled": true,
+      "hosts": ["www.eol.cn", "eol.cn"],
+      "searchPriority": 1,
+      "detailRegexes": ["/liuxue/lx-wyw/\\d+\\.html$"],
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://www.eol.cn/liuxue/lx-wyw/2025121515643.html",
+        "https://www.eol.cn/liuxue/lx-wyw/2025121515638.html"
+      ]
+    },
+    {
+      "id": "gaodun-public-cases",
+      "name": "高顿留学公开硕士案例",
+      "enabled": false,
+      "hosts": ["www.gaodun.com", "gaodun.com"],
+      "searchPriority": 1,
+      "detailRegexes": ["/liuxue/\\d+\\.html$"],
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://www.gaodun.com/liuxue/1508865.html",
+        "https://www.gaodun.com/liuxue/1733054.html"
+      ]
+    },
+    {
+      "id": "ukpass-public-cases",
+      "name": "金矢留学公开案例",
+      "enabled": true,
+      "hosts": ["www.ukpass.org", "ukpass.org"],
+      "detailRegexes": ["/study/detail-\\d+\\.html$"],
+      "paginationRegexes": ["/study/case-\\d+-7\\.html$"],
+      "paginationMaxPages": 3,
+      "paginationStrategy": "next",
+      "seedUrls": [
+        "https://www.ukpass.org/study/case-1-7.html"
+      ],
+      "fallbackUrls": [
+        "https://www.ukpass.org/study/case-7-7.html"
+      ]
+    },
+    {
+      "id": "peccn-public-cases",
+      "name": "优越留学港新公开案例",
+      "enabled": true,
+      "hosts": ["www.peccn.com", "peccn.com", "wap.peccn.com"],
+      "detailRegexes": ["/uk/\\d{6}/\\d{2}/\\d+\\.html$"],
+      "paginationRegexes": ["/uk/hksglx/gxal/index(?:_\\d+)?\\.html$"],
+      "paginationMaxPages": 3,
+      "acceptInstitutionOnly": true,
+      "seedUrls": [
+        "https://www.peccn.com/uk/hksglx/gxal/index_2.html",
+        "https://wap.peccn.com/uk/hksglx/gxal/index_2.html"
+      ],
+      "fallbackUrls": [
+        "https://wap.peccn.com/uk/202405/31/35666.html"
+      ]
+    },
+    {
+      "id": "ndjykj-public-cases",
+      "name": "Nodun public admission cases",
+      "enabled": false,
+      "hosts": ["www.ndjykj.com", "ndjykj.com"],
+      "searchPriority": 1,
+      "detailRegexes": ["/case-\\d+\\.html$"],
+      "seedUrls": [
+        "https://www.ndjykj.com/case-22.html"
+      ],
+      "fallbackUrls": []
+    },
+    {
+      "id": "jjl-public-cases",
+      "name": "金吉列公开录取案例",
+      "enabled": true,
+      "hosts": ["www.jjl.cn", "jjl.cn"],
+      "detailRegexes": ["/case/\\d+\\.html$", "/article/\\d+\\.html$"],
+      "paginationRegexes": ["/articles/n-(?:54|52)__tag-%E7%95%99%E5%AD%A6%E6%A1%88%E4%BE%8B__order-add_time(?:__page-\\d+)?$"],
+      "paginationMaxPages": 3,
+      "paginationStrategy": "next",
+      "acceptInstitutionOnly": true,
+      "casePriority": 0,
+      "ocrFallback": true,
+      "ocrImagePatterns": ["/ugc/"],
+      "seedUrls": [
+        "https://www.jjl.cn/articles/n-54__tag-%E7%95%99%E5%AD%A6%E6%A1%88%E4%BE%8B__order-add_time",
+        "https://www.jjl.cn/articles/n-52__tag-%E7%95%99%E5%AD%A6%E6%A1%88%E4%BE%8B__order-add_time"
+      ],
+      "seedUrlHints": [
+        {"urlIncludes": "/n-54__", "regions": ["中国香港", "香港"]},
+        {"urlIncludes": "/n-52__", "regions": ["新加坡"]}
+      ],
+      "fallbackUrls": [
+        "https://www.jjl.cn/case/1211106.html",
+        "https://www.jjl.cn/case/1084976.html",
+        "https://www.jjl.cn/case/1021002.html",
+        "https://www.jjl.cn/case/1106179.html",
+        "https://www.jjl.cn/case/866034.html"
+      ]
+    },
+    {
+      "id": "hksg-public-cases",
+      "name": "几何留学公开录取案例",
+      "enabled": true,
+      "hosts": ["m.hksg.org", "www.hksg.org"],
+      "detailRegexes": ["/offer_\\d+$"],
+      "entryRegexes": ["/major_\\d+(?:/\\d+)?$"],
+      "searchPriority": 0,
+      "search": {
+        "kind": "hksg-web",
+        "baseUrl": "https://www.hksg.org",
+        "majorPath": "/major",
+        "offerPath": "/offer",
+        "apiBaseUrl": "https://m.hksg.org",
+        "apiPath": "/offer/list_data"
+      },
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://m.hksg.org/offer_20946"
+      ]
+    },
+    {
+      "id": "mastermate-public-cases",
+      "name": "Mastermate公开录取案例",
+      "enabled": true,
+      "hosts": ["www.mastermate.cn", "mastermate.cn"],
+      "searchPriority": 0,
+      "detailRegexes": ["/admission/\\d+$"],
+      "search": {
+        "kind": "mastermate-api",
+        "baseUrl": "https://www.mastermate.cn",
+        "admissionPath": "/admission",
+        "apiPath": "/mm_api/admission",
+        "districtIds": [1, 4]
+      },
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://www.mastermate.cn/admission/7418"
+      ]
+    },
+    {
+      "id": "jingsailian-public-cases",
+      "name": "国际教育联盟公开案例",
+      "enabled": false,
+      "hosts": ["www.jingsailian.com", "jingsailian.com"],
+      "detailRegexes": ["/news/\\d+\\.html$"],
+      "seedUrls": [],
+      "fallbackUrls": [
+        "https://www.jingsailian.com/news/589539.html"
+      ]
+    },
+    {
+      "id": "jiayi-public-cases",
+      "name": "21世纪佳益公开录取案例",
+      "enabled": true,
+      "hosts": ["www.21sjlx.com", "21sjlx.com"],
+      "detailRegexes": ["/new/\\d+\\.html$"],
+      "seedUrls": [],
+      "fallbackUrls": []
+    },
+    {
+      "id": "middlebury-public-cases",
+      "name": "Middlebury公开案例",
+      "enabled": false,
+      "hosts": ["www.middlebury.cn", "middlebury.cn"],
+      "searchPriority": 1,
+      "detailRegexes": ["/yanjiushengliuxue2/\\d+\\.html$"],
+      "seedUrls": [],
+      "fallbackUrls": ["https://www.middlebury.cn/yanjiushengliuxue2/7921.html"]
+    },
+    {
+      "id": "ysqcedu-public-cases",
+      "name": "亦森留学公开案例",
+      "enabled": false,
+      "hosts": ["www.ysqcedu.com", "ysqcedu.com"],
+      "searchPriority": 1,
+      "detailRegexes": ["/nd\\.jsp$"],
+      "seedUrls": [],
+      "fallbackUrls": ["https://www.ysqcedu.com/nd.jsp?id=1419"]
+    },
+    {
+      "id": "wholeren-public-cases",
+      "name": "厚仁教育公开案例",
+      "enabled": false,
+      "hosts": ["www.wholeren.com", "wholeren.com"],
+      "searchPriority": 1,
+      "detailRegexes": ["/application-cases/.+"],
+      "seedUrls": [],
+      "fallbackUrls": ["https://www.wholeren.com/application-cases/cmu-y%E5%90%8C%E5%AD%A6%E7%BC%BA%E5%B0%91%E8%83%8C%E6%99%AF%E6%8B%BF%E5%88%B0%E4%BF%A1%E6%81%AF%E6%8A%80%E6%9C%AF%E7%AE%A1%E7%90%86offer/"]
+    }
+  ]
+}

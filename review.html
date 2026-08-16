@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>案例审核</title>
+  <link rel="stylesheet" href="review.css">
+</head>
+<body>
+  <main>
+    <header class="topbar">
+      <div><span class="eyebrow">ADMISSION REFERENCE</span><h1>案例审核</h1></div>
+      <nav class="topbar-actions" aria-label="管理员导航"><a href="/analytics.html">用户分析</a><a class="active" href="/review.html">案例审核</a><a href="/">申请分析</a><button id="logout" type="button">退出管理员</button></nav>
+    </header>
+    <section class="notice">
+      <p>系统只会自动通过高置信度记录；不会删除原始案例。其余记录保留在待处理区，不会进入 RAG。</p>
+      <div class="actions"><button id="refresh">刷新</button><button id="triage">自动分流高置信度案例</button><button id="llmTriage">LLM 试审 5 条</button></div>
+    </section>
+    <section id="summary" class="summary"></section>
+    <section class="collector-panel">
+      <details open>
+        <summary>独立案例采集 Agent</summary>
+        <p class="meta">启动后 Agent 会在后台跨来源搜索你选择范围内的新案例，写入待审核队列；它不依赖 Codex 窗口。国家/地区、学校和项目方向均可多选；全部留空表示港八新二全部项目。</p>
+        <form id="collector-form" class="collector-form">
+          <fieldset class="collector-scope"><legend>采集范围</legend>
+            <label>国家/地区<select id="collector-countries" name="countries" multiple size="2"></select></label>
+            <label>学校<select id="collector-institutions" name="institutions" multiple size="6"></select></label>
+            <label>项目方向<select id="collector-focus-tags" name="focusTags" multiple size="6"></select></label>
+            <p class="meta scope-hint">多选请按住 Ctrl；全部不选代表不限制该项。</p>
+          </fieldset>
+          <label>项目尝试上限<input name="limit" type="number" min="1" max="2000" value="2000"></label>
+          <label>并发项目数<input name="concurrency" type="number" min="1" max="6" value="3"></label>
+          <label>每项目目标<input name="targetApproved" type="number" min="1" max="50" value="10"></label>
+          <label>每项目页面上限<input name="maxPages" type="number" min="1" max="30" value="8"></label>
+          <label>搜索请求预算<input name="searchRequests" type="number" min="1" max="100" value="36"></label>
+          <label class="collector-check"><input name="importMastermate" type="checkbox">同时导入 Mastermate 索引</label>
+          <div class="collector-actions"><button id="collector-start" type="submit">启动自动采集</button><button id="collector-stop" type="button">停止采集</button><button id="collector-refresh" type="button">刷新状态</button></div>
+        </form>
+        <p id="collector-state" class="meta">正在读取 Agent 状态…</p>
+        <pre id="collector-log" class="collector-log"></pre>
+      </details>
+    </section>
+    <section id="coverage" class="coverage" aria-live="polite"></section>
+    <section id="llmPreview" class="preview" hidden></section>
+    <section class="filters"><label>显示状态 <select id="status"><option value="needs-review,pending">待处理</option><option value="needs-review">需要复核</option><option value="pending">结构完整待分流</option></select></label></section>
+    <section id="list" class="list"></section>
+  </main>
+  <script type="module" src="review.mjs"></script>
+</body>
+</html>

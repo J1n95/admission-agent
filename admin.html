@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>管理员登录</title>
+  <style>
+    :root { color-scheme: light; --ink:#111; --muted:#6c6c6c; --line:#d5d5d5; --paper:#f7f7f3; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--paper); color:var(--ink); font-family:Arial,"Microsoft YaHei",sans-serif; }
+    main { width:min(420px,calc(100% - 32px)); border-top:2px solid var(--ink); padding-top:24px; }
+    h1 { margin:8px 0; font-size:32px; letter-spacing:-.06em; }
+    p { color:var(--muted); font-size:13px; line-height:1.7; }
+    label { display:grid; gap:7px; margin:24px 0 12px; color:var(--muted); font-size:12px; }
+    input,button { width:100%; border:1px solid var(--ink); background:#fff; color:var(--ink); padding:12px; font:inherit; }
+    button { margin-top:8px; background:var(--ink); color:#fff; cursor:pointer; }
+    button:hover { opacity:.8; }
+    .error { color:#8b1e1e; min-height:20px; }
+    .back { display:inline-block; margin-top:20px; color:var(--ink); font-size:13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <span>ADMISSION REFERENCE · ADMIN</span>
+    <h1>管理员登录</h1>
+    <p>用户分析记录、问卷反馈、案例审核和案例采集只对管理员开放。</p>
+    <form id="login-form">
+      <label>管理员密码<input id="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit">进入管理员后台</button>
+    </form>
+    <p id="error" class="error" role="alert"></p>
+    <a class="back" href="/">返回申请分析</a>
+  </main>
+  <script type="module" src="admin.mjs"></script>
+</body>
+</html>

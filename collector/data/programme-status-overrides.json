@@ -1,0 +1,15 @@
+{
+  "cityu-hk-msc-cybersecurity": {
+    "status": "confirmed-new",
+    "reason": "CityU官方活动页面明确将MSc Cybersecurity列为2026入学新硕士项目",
+    "evidenceUrl": "https://www.cityu.edu.hk/en/cc/news-and-events/events/past-events/online-information-session-for-new-masters-programmes-12-jan-2026",
+    "confidence": 0.98
+  },
+  "ntu-master-of-science-applied-materials-analytics": {
+    "status": "confirmed-new",
+    "reason": "NTU官方说明该项目于2026年新开设",
+    "currentUrl": "https://www.ntu.edu.sg/engineering/coe-programmes/graduate/coe-programme-detail/master-of-science-in-applied-materials-analytics",
+    "evidenceUrl": "https://www.ntu.edu.sg/mse/admissions/postgraduates/prospective-students/coursework/master-of-science-Applied-Materials-Analytics",
+    "confidence": 0.98
+  }
+}

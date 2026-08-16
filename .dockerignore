@@ -1,0 +1,9 @@
+.git
+.env
+outputs
+work
+collector/data/*.sqlite*
+collector/data/*.bak
+collector/data/*.jsonl
+collector/data/expansion-agent-*.json
+server-check.*.log
