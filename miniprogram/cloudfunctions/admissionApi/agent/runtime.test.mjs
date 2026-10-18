@@ -4,8 +4,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   assessmentPrompt, screeningPrompt, prepareAgentAnalysis,
-  normalizeAgentAssessments, normalizeProbabilityCalibration, mergeProbabilityCalibration,
-  validateProgrammeScreeningResult, extractLanguageAssessment, unsupportedLanguageClaim, parseModelJson
+  normalizeAgentAssessments, normalizeProbabilityCalibration, mergeProbabilityCalibration, buildAcademicCalibrationRequest,
+  validateProgrammeScreeningResult, finalizeProgrammeScreening, extractLanguageAssessment, unsupportedLanguageClaim, parseModelJson
 } from './runtime.mjs';
 
 assert.deepEqual(parseModelJson('{"probabilities":{"p":{"rank":1}}', 'stop'), { probabilities: { p: { rank: 1 } } },
@@ -159,6 +159,39 @@ const calibration = normalizeProbabilityCalibration({ probabilities: {
 } }, prepared);
 assert.equal(calibration[candidate.id].center, 55);
 assert.ok(calibration[candidate.id].high - calibration[candidate.id].low >= 20);
+const neutralRequest = {
+  profile: { structured: {
+    ...prepared.modelInput.profile.structured,
+    university: '河南大学', schoolTier: 2, schoolClassification: '双一流', gpaValue: 85.5,
+    gpaStandardization: { rawScore: 85.5, rawScale: '100', backgroundCorrection: { default: 2 }, equivalentScore: { default: 83.5 } }
+  } },
+  programmes: prepared.modelInput.programmes
+};
+const weakerRequest = structuredClone(neutralRequest);
+weakerRequest.profile.structured.university = '南京财经大学';
+weakerRequest.profile.structured.schoolTier = 1;
+weakerRequest.profile.structured.schoolClassification = '双非';
+weakerRequest.profile.structured.gpaStandardization.backgroundCorrection.default = 3;
+weakerRequest.profile.structured.gpaStandardization.equivalentScore.default = 82.5;
+weakerRequest.programmes = structuredClone(neutralRequest.programmes);
+weakerRequest.programmes[0].caseDistribution.gpa.user = 82.5;
+weakerRequest.programmes[0].caseDistribution.gpa.rank = 5;
+assert.deepEqual(buildAcademicCalibrationRequest(neutralRequest).input, buildAcademicCalibrationRequest(weakerRequest).input,
+  'Equal raw grades and disclosed backgrounds must use one neutral calibration request across school tiers');
+const academicOutput = { probabilities: { [candidate.id]: {
+  rank: 1, center: 63, low: 45, high: 76, confidence: 'medium', basis: ['相同申请背景'],
+  academicCenters: { elite985: 63, non985211: 61, doubleFirstClass: 47, ordinary: 58 }
+} } };
+const strongerCenter = normalizeProbabilityCalibration(academicOutput, prepared, 'doubleFirstClass')[candidate.id].center;
+const weakerCalibration = normalizeProbabilityCalibration(academicOutput, prepared, 'ordinary')[candidate.id];
+const weakerCenter = weakerCalibration.center;
+assert.equal(strongerCenter, 47);
+assert.equal(weakerCenter, 47, 'A weaker academic band must not be displayed above a stronger band for the same input');
+assert.equal(weakerCalibration.confidence, 'low');
+assert.equal(weakerCalibration.academicMonotonicAdjusted, true);
+assert.deepEqual(normalizeProbabilityCalibration({ probabilities: { [candidate.id]: {
+  rank: 1, center: 63, low: 45, high: 76, basis: ['未提供档次对照']
+} } }, prepared, 'ordinary'), {}, 'Missing academic counterfactuals must not pass the calibration contract');
 assert.deepEqual(normalizeProbabilityCalibration({ probabilities: {
   [candidate.id]: { rank: 1, center: 55, low: 35, high: 75, basis: ['无实习、无奖项，因此相关经历不足'] }
 } }, prepared), {}, 'Undisclosed form fields cannot become confirmed applicant disadvantages in ranking');
@@ -200,5 +233,28 @@ assert.deepEqual(validateProgrammeScreeningResult({
   selectedProgrammeIds: [candidate.id],
   programmeDecisions: { [candidate.id]: { decision: 'include', directionFit: 'direct' } }
 }, { projects: [{ id: candidate.id }] }).selectedProgrammeIds, [candidate.id]);
+
+const screeningCandidates = ['design', 'fashion', 'creative-media', 'architecture'].map(id => ({ id }));
+const screeningResult = {
+  selectedProgrammeIds: ['design', 'fashion'],
+  programmeDecisions: {
+    design: { decision: 'include', directionFit: 'direct' },
+    fashion: { decision: 'include', directionFit: 'direct' },
+    'creative-media': { decision: 'exclude', directionFit: 'adjacent' },
+    architecture: { decision: 'exclude', directionFit: 'adjacent' }
+  }
+};
+assert.deepEqual(finalizeProgrammeScreening(screeningResult, null, screeningCandidates, { maximum: 8 }).selectedProgrammeIds,
+  ['design', 'fashion'], 'Do not fill eight slots by re-adding excluded programmes');
+assert.deepEqual(finalizeProgrammeScreening({
+  selectedProgrammeIds: ['design', 'architecture'],
+  programmeDecisions: { ...screeningResult.programmeDecisions, architecture: { decision: 'uncertain', directionFit: 'direct' } }
+}, {
+  selectedProgrammeIds: [],
+  programmeDecisions: { architecture: { decision: 'exclude', directionFit: 'adjacent' } }
+}, screeningCandidates, { maximum: 8 }).selectedProgrammeIds,
+['design'], 'Full review must be able to remove an uncertain card-stage candidate');
+assert.deepEqual(finalizeProgrammeScreening({ selectedProgrammeIds: [], programmeDecisions: {} }, null,
+  screeningCandidates, { maximum: 8 }).selectedProgrammeIds, [], 'No model selections must remain empty');
 
 console.log(`legacy Agent cloud runtime checks passed (${programmeCases.length} approved cityu-eie cases)`);

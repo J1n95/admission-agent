@@ -1,3 +1,5 @@
+import { isVerifiedDoubleFirstClass } from "./verified-double-first-class.mjs";
+
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const round = value => Math.round(value * 1000) / 1000;
 const median = values => {
@@ -40,14 +42,14 @@ const elite211 = new Set("北京交通大学 北京工业大学 北京科技大�
 
 function inferredSchoolClassification(profile = {}) {
   const explicit = String(profile.schoolClassification || "");
-  if (explicit) return explicit;
+  if (explicit && explicit !== "待主表分类") return explicit;
   const name = String(profile.university || profile.school || profile.undergraduateUniversity || "").replace(/[（(].*?[）)]/g, "").trim();
   if (elite985.has(name) || /985|C9/i.test(name)) return "985本科";
   if (elite211.has(name) || /211|财经211/i.test(name)) return "211本科";
+  if (isVerifiedDoubleFirstClass(name)) return "双一流";
   if (/双一流/.test(name)) return "双一流";
   if (/海本|海外|澳本|英本|美本|加本|国外|University|College/i.test(name)) return "海外本科";
   if (/双非|一本|二本|民办|独立院校/.test(name)) return "双非";
-  if (/大学|学院|院校/.test(name)) return "双非";
   return "";
 }
 
@@ -349,7 +351,8 @@ export function analyzeCaseEvidence(profile, programme) {
             : "只比较相同分制的原始GPA；未换算为百分制，也未做985基准校正。"
         },
         note: gpaStats && Number.isFinite(normalizedUserGpa) ? null
-          : percentScale ? "没有可比较的百分制审核案例或无法计算院校基准分，不显示GPA位置。"
+          : percentScale && gpaStats ? "已收到百分制均分，但院校层次未核验，无法计算985基准比较分；不展示跨院校案例位置。"
+          : percentScale ? "没有可比较的百分制审核案例，不展示均分案例位置。"
           : "没有相同分制的审核案例，不把GPA换算成百分制来制造比较。"
       },
       language: {

@@ -96,3 +96,33 @@ test("GPA comparison freezes paired stages and case counts within budget", () =>
     [11, 5, 11, 5]
   );
 });
+
+test("school-tier smoke holds one programme and four assessment calls under one yuan", () => {
+  const cwd = fileURLToPath(new URL("..", import.meta.url));
+  const result = spawnSync(process.execPath, ["eval/model-ab.mjs", "--school-tier-smoke"], {
+    cwd, env: { ...process.env, DEEPSEEK_API_KEY: "" }, encoding: "utf8"
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.mode, "school-tier-smoke");
+  assert.deepEqual(report.stages, { selection: 0, assessment: 4, ranking: 0 });
+  assert.equal(report.calls.length, 4);
+  assert.ok(report.scenarios.every(item => item.programmeId === "hkust-ee" && item.approvedCaseCount === 29));
+  assert.ok(report.calls.every(item => item.provider === "DeepSeek" && item.model === "deepseek-flash"));
+  assert.ok(report.combinedConservativeEstimateCny < 1);
+});
+
+test("non-elite sweep holds ten paired directions and all three agent stages under five yuan", () => {
+  const cwd = fileURLToPath(new URL("..", import.meta.url));
+  const result = spawnSync(process.execPath, ["eval/model-ab.mjs", "--non-elite-sweep"], {
+    cwd, env: { ...process.env, DEEPSEEK_API_KEY: "" }, encoding: "utf8"
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.mode, "non-elite-sweep");
+  assert.deepEqual(report.stages, { selection: 20, assessment: 20, ranking: 8 });
+  assert.equal(new Set(report.scenarios.filter(item => item.stage === "selection")
+    .map(item => item.scenario.slice("cross-nonelite-".length, -"-selection".length))).size, 20);
+  assert.ok(report.calls.every(item => item.provider === "DeepSeek" && item.model === "deepseek-flash"));
+  assert.ok(report.combinedConservativeEstimateCny < 5);
+});

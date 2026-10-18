@@ -29,6 +29,15 @@ assert.ok(schools.some(item => item.classification === "海外本科"), "The sch
 assert.deepEqual(estimateFourPointGpa(85), { min: 3.3, max: 3.7, label: "3.3–3.7" }, "Percent scores must use a rough GPA interval");
 const standardized211 = standardizeGpa({ gpaScale: "100", gpaValue: 86, schoolTier: 2, schoolClassification: "211 / 双一流" });
 assert.deepEqual(standardized211.equivalentScore, { min: 84, max: 85, default: 84.5 }, "211 background correction must preserve an equivalent-score range");
+for (const standardize of [standardizeGpa, profile => analyzeMiniProgramCaseEvidence(profile, { cases: [] }).evidence.gpa]) {
+  const result = standardize({ university: "成都理工大学", schoolClassification: "待主表分类", gpaScale: "100", gpaValue: 82 });
+  assert.equal(result.equivalentScore?.default ?? result.user, 80, "A verified non-211 Double First-Class school must not be treated as an ordinary unknown school");
+}
+assert.ok(standardizeGpa({ university: "成都理工大学", gpaScale: "100", gpaValue: 82 }).equivalentScore.default
+  < standardizeGpa({ university: "中国矿业大学", gpaScale: "100", gpaValue: 82 }).equivalentScore.default,
+"At the same reported average, the internal comparison score must not treat non-211 Double First-Class as above 211");
+assert.equal(standardizeGpa({ university: "成都理工大学工程技术学院", gpaScale: "100", gpaValue: 82 }).equivalentScore, null,
+  "A different institution must not inherit the parent university correction");
 assert.equal(standardized211.officialGpa, null, "A percent average must not be mislabeled as official GPA");
 const standardizedGpa = standardizeGpa({ gpaScale: "4", gpaValue: 3.23, schoolTier: 3, schoolClassification: "海外本科" });
 assert.equal(standardizedGpa.officialGpa, 3.23, "An entered four-point GPA must remain an original GPA");

@@ -128,6 +128,7 @@ input, select, textarea {
 }
 select { border-color: var(--line); background: var(--paper); color: var(--ink); }
 select option { background: var(--paper); color: var(--ink); }
+select option:checked { background: var(--ink); color: var(--paper); }
 input:hover, select:hover, textarea:hover { border-color: var(--ink); }
 .school-combobox, .select-ui { position: relative; }
 .major-combobox { position: relative; }

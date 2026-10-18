@@ -6,6 +6,7 @@ import { listApprovedCases, openCaseStore } from "../collector/store.mjs";
 import * as agent from "../miniprogram/cloudfunctions/admissionApi/agent/runtime.mjs";
 import { standardizeGpa } from "../miniprogram/cloudfunctions/admissionApi/agent/case-analysis.mjs";
 import { normalizeAssessment } from "../miniprogram/cloudfunctions/admissionApi/agent/assessment-contract.mjs";
+import { resolveExactInstitution } from "../master-data.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagedData = Boolean(process.env.ADMISSION_AGENT_DATA_DIR);
@@ -195,18 +196,6 @@ async function runProjectScreening(profile, payload, candidates, fullEvidenceByP
   return agent.mergeScreeningResults(results, 8);
 }
 
-function localScreeningFallback(candidates, reason) {
-  const selected = candidates.slice(0, 8);
-  return {
-    selectedProgrammeIds: selected.map(programme => programme.id),
-    programmeDecisions: Object.fromEntries(selected.map(programme => [programme.id, {
-      decision: "include", directionFit: "direct", reason: "本地候选排序兜底"
-    }])),
-    configured: false,
-    fallbackReason: String(reason || "项目初筛模型未及时返回")
-  };
-}
-
 function loadProgrammeCards(candidates) {
   return candidates.map(item => ({ ...item, ...(programmeById.get(item.id) || {}) }));
 }
@@ -270,8 +259,9 @@ async function runAgentAssessments(prepared) {
     timeoutMs,
     thinking
   ));
+  const academicCalibration = agent.buildAcademicCalibrationRequest(calibrationInput);
   const calibrationResult = await requestAgent(
-    agent.probabilityCalibrationPrompt, calibrationInput, calibrationTimeoutMs, thinking
+    agent.probabilityCalibrationPrompt, academicCalibration.input, calibrationTimeoutMs, thinking
   ).then(value => ({ value })).catch(error => ({ error }));
   const assessments = {};
   const errors = [];
@@ -286,7 +276,7 @@ async function runAgentAssessments(prepared) {
     }
   });
   if (calibrationResult.error) errors.push(`横向概率校准:${calibrationResult.error.message || "模型调用失败"}`);
-  return { assessments, calibration: calibrationResult.value || null, errors };
+  return { assessments, calibration: calibrationResult.value || null, academicBand: academicCalibration.band, errors };
 }
 
 function toDisplayCase(item) {
@@ -347,7 +337,13 @@ export function displayProgramme(programme, cases, evidenceRows = []) {
 
 export async function analyzeWithLegacyAgent(payload = {}) {
   refreshApprovedCases();
-  const profile = payload.profile || {};
+  const submittedProfile = payload.profile || {};
+  const verifiedInstitution = resolveExactInstitution(submittedProfile.university);
+  const profile = verifiedInstitution ? {
+    ...submittedProfile,
+    schoolTier: verifiedInstitution.scoreTier,
+    schoolClassification: verifiedInstitution.classification
+  } : { ...submittedProfile, schoolTier: null, schoolClassification: null };
   const maximumGpa = { "100": 100, "4": 4, "5": 5 }[String(profile.gpaScale)];
   if (!profile.university || !profile.majorName || !Number.isFinite(Number(profile.gpaValue))) {
     throw new Error("本科院校、专业和成绩信息不完整。");
@@ -371,7 +367,7 @@ export async function analyzeWithLegacyAgent(payload = {}) {
     cardScreening = await runProjectScreening(analysisProfile, payload, programmeCards);
     if (!cardScreening.selectedProgrammeIds.length) throw new Error("项目初筛模型没有保留候选项目");
   } catch (error) {
-    cardScreening = localScreeningFallback(programmeCards, error.message);
+    throw new Error(`项目初筛失败：${error.message || "模型未及时返回"}`);
   }
 
   const uncertainIds = cardScreening.selectedProgrammeIds
@@ -403,8 +399,11 @@ export async function analyzeWithLegacyAgent(payload = {}) {
   const prepared = agent.prepareAgentAnalysis(analysisProfile, loaded.candidates, evidenceByProgramme, 6);
   const generated = await runAgentAssessments(prepared);
   const normalized = agent.normalizeAgentAssessments(generated.assessments, prepared);
-  const calibration = agent.normalizeProbabilityCalibration(generated.calibration, prepared);
+  const calibration = agent.normalizeProbabilityCalibration(generated.calibration, prepared, generated.academicBand);
   const calibrationValid = Object.keys(calibration).length === prepared.modelInput.programmes.length;
+  if (generated.academicBand && !calibrationValid) {
+    throw new Error('院校档次横向对照未通过校验，本次不展示未经检查的参考数值。请重试。');
+  }
   const assessments = agent.mergeProbabilityCalibration(normalized, calibration, prepared);
   const comparisonProfile = prepared.modelInput.profile.structured;
   const assessmentErrors = [...generated.errors];

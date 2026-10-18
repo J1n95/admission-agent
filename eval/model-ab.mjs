@@ -4,6 +4,8 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { performance } from "node:perf_hooks";
+import { resolveExactInstitution } from "../master-data.mjs";
+import { standardizeGpa } from "../case-analysis.mjs";
 import {
   assessmentPrompt,
   buildScreeningProjects,
@@ -27,10 +29,28 @@ const crossDiscipline = process.argv.includes("--cross-discipline");
 const expandedDiscipline = process.argv.includes("--cross-discipline-expanded");
 const gpaFiveReview = process.argv.includes("--gpa-five-review");
 const gpaCompare = process.argv.includes("--gpa-compare");
-if ([qwenChallenger, deepseekReview, crossDiscipline, expandedDiscipline, gpaFiveReview, gpaCompare].filter(Boolean).length > 1) {
+const schoolTierSmoke = process.argv.includes("--school-tier-smoke");
+const nonEliteSweep = process.argv.includes("--non-elite-sweep");
+if ([qwenChallenger, deepseekReview, crossDiscipline, expandedDiscipline, gpaFiveReview, gpaCompare, schoolTierSmoke, nonEliteSweep].filter(Boolean).length > 1) {
   throw new Error("单模型评测模式不能同时启用。");
 }
-const maxCnyDefault = crossDiscipline || expandedDiscipline || gpaCompare ? 2 : deepseekReview || gpaFiveReview ? 1 : qwenChallenger ? 5 : 10;
+const maxCnyDefault = nonEliteSweep ? 5 : crossDiscipline || expandedDiscipline || gpaCompare ? 2 : deepseekReview || gpaFiveReview || schoolTierSmoke ? 1 : qwenChallenger ? 5 : 10;
+const schoolTierProfile = university => {
+  const institution = resolveExactInstitution(university);
+  assert.ok(institution, `测试院校不在主表中：${university}`);
+  const profile = {
+    university, schoolTier: institution.scoreTier, schoolClassification: institution.classification,
+    major: "electronic", majorName: "电子信息工程", gpaScale: "100", gpaValue: 82,
+    languageTest: "IELTS", language: 7, targetFields: ["electronic"],
+    internships: [{ direction: "electronic", companyTypes: ["private"] }], researches: [], awards: []
+  };
+  return { ...profile, gpaStandardization: standardizeGpa(profile) };
+};
+const schoolTierProfiles = ["中国矿业大学", "成都理工大学", "杭州电子科技大学", "南京邮电大学"]
+  .map((university, index) => ({
+    id: `school-tier-${index + 1}`, profile: schoolTierProfile(university),
+    assessmentIds: ["hkust-ee"]
+  }));
 const qwenChallengerScenarios = new Set([
   "selection-electronic",
   "selection-sparse-and-adjacent",
@@ -74,7 +94,7 @@ const allProviders = [
 ];
 const providers = qwenChallenger
   ? allProviders.filter(provider => provider.name === "千问")
-  : deepseekReview || crossDiscipline || expandedDiscipline || gpaFiveReview || gpaCompare
+  : deepseekReview || crossDiscipline || expandedDiscipline || gpaFiveReview || gpaCompare || schoolTierSmoke || nonEliteSweep
     ? allProviders.filter(provider => provider.name === "DeepSeek")
     : allProviders;
 
@@ -170,7 +190,62 @@ const gpaPercentProfile = {
   id: "gpa-percent-health",
   profile: { ...gpaFiveProfile.profile, gpaScale: "100", gpaValue: 82.6 }
 };
-const fixtureProfiles = [...allCrossProfiles, gpaFiveProfile, gpaPercentProfile];
+const nonEliteDirections = [
+  { id: "electronic", schools: ["南京邮电大学", "杭州电子科技大学"], fields: ["electronic", "communication"],
+    major: "electronic", majorName: "电子信息工程", score: 82,
+    programmeIds: ["hkust-ee", "cityu-eie", "cuhk-ee", "ntu-electronics"], assessmentIds: ["hkust-ee", "cityu-eie"] },
+  { id: "ai", schools: ["南京邮电大学", "杭州电子科技大学"], fields: ["ai", "data"],
+    major: "computer", majorName: "计算机科学与技术", score: 85,
+    programmeIds: ["cityu-hk-msc-artificial-intelligence", "cuhk-msc-in-artificial-intelligence", "hku-master-of-science-in-artificial-intelligence", "hku-master-of-journalism"],
+    assessmentIds: ["cityu-hk-msc-artificial-intelligence", "cuhk-msc-in-artificial-intelligence"] },
+  { id: "finance", schools: ["河南大学", "南京财经大学"], fields: ["finance"],
+    major: "economics", majorName: "金融学", score: 85.5,
+    programmeIds: ["hku-master-of-finance", "cityu-hk-msc-finance", "cuhk-master-of-accountancy", "nus-master-of-science-in-quantitative-finance"],
+    assessmentIds: ["cityu-hk-msc-finance", "hku-master-of-finance"] },
+  { id: "media", schools: ["河南大学", "青岛大学"], fields: ["media"],
+    major: "media", majorName: "新闻学", score: 82,
+    programmeIds: ["cityu-hk-ma-communication-and-new-media", "hku-master-of-journalism", "cuhk-ma-in-journalism", "cityu-hk-ma-creative-media"],
+    assessmentIds: ["cityu-hk-ma-communication-and-new-media", "hku-master-of-journalism"] },
+  { id: "law", schools: ["河南大学", "青岛大学"], fields: ["law"],
+    major: "law", majorName: "法学", score: 84,
+    programmeIds: ["cuhk-master-of-laws-in-common-law", "cityu-hk-master-of-laws", "cuhk-master-of-laws-in-chinese-business-law", "hku-master-of-public-administration"],
+    assessmentIds: ["cityu-hk-master-of-laws", "cuhk-master-of-laws-in-common-law"] },
+  { id: "public-health", schools: ["广州医科大学", "青岛大学"], fields: ["public-health"],
+    major: "medicine", majorName: "预防医学", score: 88,
+    programmeIds: ["hku-master-of-public-health", "cityu-hk-master-of-public-health", "cuhk-master-of-public-health", "cuhk-msc-in-nutrition-food-science-and-technology"],
+    assessmentIds: ["hku-master-of-public-health", "cityu-hk-master-of-public-health"] },
+  { id: "education", schools: ["河南大学", "江苏师范大学"], fields: ["education"],
+    major: "education", majorName: "教育学", score: 86,
+    programmeIds: ["cuhk-master-of-education", "hku-master-of-education", "cuhk-ma-in-teaching-english-to-speakers-of-other-languages", "hku-master-of-arts-in-teaching-english-to-speakers-of-other-languages"],
+    assessmentIds: ["cuhk-master-of-education", "hku-master-of-education"] },
+  { id: "psychology", schools: ["河南大学", "江苏师范大学"], fields: ["psychology"],
+    major: "psychology", majorName: "心理学", score: 84,
+    programmeIds: ["polyu-hk-applied-psychology", "polyu-hk-school-and-community-psychology", "polyu-hk-marriage-and-family-therapy", "hku-master-of-social-work"],
+    assessmentIds: ["polyu-hk-applied-psychology", "polyu-hk-school-and-community-psychology"] },
+  { id: "environment", schools: ["成都理工大学", "广东工业大学"], fields: ["environmental", "energy"],
+    major: "environmental", majorName: "环境工程", score: 83,
+    programmeIds: ["hku-master-of-science-in-environmental-management", "cityu-hk-msc-energy-and-environment", "hkust-msc-pgd-in-environmental-engineering-and-management", "cuhk-master-of-laws-in-energy-and-environmental-law"],
+    assessmentIds: ["hku-master-of-science-in-environmental-management", "cityu-hk-msc-energy-and-environment"] },
+  { id: "design", schools: ["中国美术学院", "广东工业大学"], fields: ["design", "arts"],
+    major: "design", majorName: "工业设计", score: 84,
+    programmeIds: ["polyu-hk-design", "polyu-hk-fashion-design", "cityu-hk-ma-creative-media", "hku-master-of-architecture-design"],
+    assessmentIds: ["polyu-hk-design", "cityu-hk-ma-creative-media"] }
+];
+const nonEliteProfiles = nonEliteDirections.flatMap(direction => direction.schools.map((university, index) => {
+  const institution = resolveExactInstitution(university);
+  assert.ok(institution && (index === 0 ? institution.classification === "双一流" : institution.classification === "双非"),
+    `非985/211对照院校分类不符：${university}`);
+  const profile = {
+    university, schoolTier: institution.scoreTier, schoolClassification: institution.classification,
+    major: direction.major, majorName: direction.majorName, gpaScale: "100", gpaValue: direction.score,
+    languageTest: "IELTS", language: 7, targetFields: direction.fields,
+    internships: [{ direction: direction.fields[0], companyTypes: ["private"] }], researches: [], awards: []
+  };
+  return { id: `nonelite-${direction.id}-${index ? "ordinary" : "dfc"}`, domain: direction.id,
+    fields: direction.fields, profile: { ...profile, gpaStandardization: standardizeGpa(profile) },
+    programmeIds: direction.programmeIds, assessmentIds: direction.assessmentIds };
+}));
+const fixtureProfiles = [...allCrossProfiles, gpaFiveProfile, gpaPercentProfile, ...nonEliteProfiles];
 
 const sha256 = value => createHash("sha256").update(String(value)).digest("hex");
 const dataNames = {
@@ -255,7 +330,7 @@ const assessmentScenarios = [
   "ntu-financial-technology",
   "hku-eee"
 ].map(id => ({ id: `assessment-${id}`, programmeId: id }))
-  .concat(fixtureProfiles.flatMap(item => item.assessmentIds.map(programmeId => ({
+  .concat([...fixtureProfiles, ...schoolTierProfiles].flatMap(item => item.assessmentIds.map(programmeId => ({
     id: `cross-${item.id}-assessment-${programmeId}`, programmeId,
     comparisonIds: item.assessmentIds, profile: item.profile
   }))));
@@ -517,6 +592,15 @@ function makeJobs() {
     ? allFixtures.filter(fixture => expandedProfiles.some(profile => fixture.scenario.startsWith(`cross-${profile.id}-`)))
     : gpaFiveReview
     ? allFixtures.filter(fixture => fixture.scenario.startsWith(`cross-${gpaFiveProfile.id}-`))
+    : nonEliteSweep
+    ? allFixtures.filter(fixture => {
+      const profile = nonEliteProfiles.find(item => fixture.scenario.startsWith(`cross-${item.id}-`));
+      return profile && (fixture.stage === "selection"
+        || fixture.stage === "assessment" && fixture.programmeId === profile.assessmentIds[0]
+        || fixture.stage === "ranking" && ["electronic", "finance", "psychology", "design"].includes(profile.domain));
+    })
+    : schoolTierSmoke
+    ? allFixtures.filter(fixture => fixture.scenario.startsWith("cross-school-tier-"))
     : gpaCompare
     ? allFixtures.filter(fixture => [gpaFiveProfile, gpaPercentProfile]
       .some(profile => fixture.scenario.startsWith(`cross-${profile.id}-`)))
@@ -529,6 +613,8 @@ function makeJobs() {
   if (expandedDiscipline) assert.equal(fixtures.length, 8, "扩展测试场景集不完整");
   if (gpaFiveReview) assert.equal(fixtures.length, 4, "五分制跨专业测试场景集不完整");
   if (gpaCompare) assert.equal(fixtures.length, 8, "GPA与均分成对测试场景集不完整");
+  if (schoolTierSmoke) assert.equal(fixtures.length, 4, "院校分层对照场景集不完整");
+  if (nonEliteSweep) assert.equal(fixtures.length, 48, "非985/211跨方向对照场景集不完整");
   if (qwenChallenger) assert.equal(fixtures.length, qwenChallengerScenarios.size, "千问候选模型场景集不完整");
   if (deepseekReview) assert.equal(fixtures.length, deepseekReviewScenarios.size, "DeepSeek 提示词复测场景集不完整");
   return fixtures.flatMap(fixture => providers.map(provider => {
@@ -556,7 +642,7 @@ const maxCnyArgument = process.argv.find(arg => arg.startsWith("--max-cny="));
 const maxCny = Number(maxCnyArgument?.split("=")[1] || maxCnyDefault);
 
 const plan = {
-  mode: gpaCompare ? "gpa-compare" : gpaFiveReview ? "gpa-five-review" : expandedDiscipline ? "cross-discipline-expanded" : crossDiscipline ? "cross-discipline" : deepseekReview ? "deepseek-review" : qwenChallenger ? "qwen-challenger" : running ? "run" : "dry-run",
+  mode: nonEliteSweep ? "non-elite-sweep" : schoolTierSmoke ? "school-tier-smoke" : gpaCompare ? "gpa-compare" : gpaFiveReview ? "gpa-five-review" : expandedDiscipline ? "cross-discipline-expanded" : crossDiscipline ? "cross-discipline" : deepseekReview ? "deepseek-review" : qwenChallenger ? "qwen-challenger" : running ? "run" : "dry-run",
   budgetCny: maxCny,
   stages: {
     selection: jobs.filter(item => item.fixture.stage === "selection").length,
@@ -632,9 +718,9 @@ if (recheckArgument) {
 } else if (resolve(process.argv[1] || "") === fileURLToPath(import.meta.url)) console.log(JSON.stringify(plan, null, 2));
 
 if (running) {
-  const budgetCeiling = crossDiscipline || expandedDiscipline || gpaCompare ? 2 : deepseekReview || gpaFiveReview ? 1 : qwenChallenger ? 5 : 10;
+  const budgetCeiling = nonEliteSweep ? 5 : crossDiscipline || expandedDiscipline || gpaCompare ? 2 : deepseekReview || gpaFiveReview || schoolTierSmoke ? 1 : qwenChallenger ? 5 : 10;
   if (!Number.isFinite(maxCny) || maxCny <= 0 || maxCny > budgetCeiling) throw new Error(`本轮预算必须显式设置为 ${budgetCeiling} 元或更低；未发起模型请求。`);
-  if (deepseekReview || crossDiscipline || expandedDiscipline || gpaFiveReview || gpaCompare) {
+  if (deepseekReview || crossDiscipline || expandedDiscipline || gpaFiveReview || gpaCompare || schoolTierSmoke || nonEliteSweep) {
     if (providers.length !== 1 || providers[0]?.model !== "deepseek-flash") {
       throw new Error("本轮复测只允许使用 deepseek-flash；未发起模型请求。");
     }

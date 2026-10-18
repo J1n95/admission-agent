@@ -330,13 +330,14 @@ async function renderSchoolOptions(query = "") {
     remoteSchoolMatches = (payload.results || []).map(item => ({
       name: item.nameZh || item.nameEn,
       aliases: [item.nameEn, item.aliases].filter(Boolean),
-      classification: item.classification || "待主表分类",
+      classification: item.classification || null,
       scoreTier: item.scoreTier,
       qs: null,
       arwu: null,
       source: item.source
     }));
     paintSchoolOptions(query);
+    renderSchoolMatch();
   } catch {}
 }
 
@@ -345,6 +346,10 @@ function renderSchoolMatch() {
   $("#school-tier").value = school?.scoreTier ?? "";
   if (!school) {
     $("#school-match").innerHTML = `<strong>暂未识别</strong><span>可继续填写；系统不会凭名称猜测985/211或排名。</span>`;
+    return;
+  }
+  if (!school.classification) {
+    $("#school-match").innerHTML = `<strong>院校身份已匹配，层次待核验</strong><span>本次不按未核实的院校层次换算均分；不会据此给出案例位置。</span>`;
     return;
   }
   if (school.source === "ROR" && school.scoreTier == null) {
@@ -542,7 +547,8 @@ function gpaEvidence(result) {
   if (!stats.available) {
     return `
       <div class="evidence-block gpa-evidence">
-        <h3>GPA案例位置</h3>
+        <h3>${percent ? "均分案例位置" : "GPA案例位置"}</h3>
+        ${percent && Number.isFinite(stats.rawUser) ? `<p>已填写百分制均分：${formatNumber(stats.rawUser)}。</p>` : ""}
         <p>${escapeHtml(stats.note || "当前没有同分制的审核案例，因此不显示容易误导的GPA分布。")}</p>
       </div>
     `;

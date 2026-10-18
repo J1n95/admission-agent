@@ -1,6 +1,7 @@
 import { programmes as seededProgrammes, schools as seededSchools } from "./data.mjs";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { doubleFirstClassOnlyNames } from "./verified-double-first-class.mjs";
 
 const normalizeName = value => String(value || "")
   .normalize("NFKC")
@@ -115,7 +116,20 @@ const fromSeed = seededSchools.map(school => ({
   ranking: { qs: school.qs || null, arwu: school.arwu || null, sourceUrl: school.rankingUrl || null }
 }));
 
-export const institutionMaster = [...fromSeed, ...institutionExtras]
+const existingInstitutionNames = new Set([...fromSeed, ...institutionExtras].map(item => normalizeName(item.nameZh)));
+const verifiedDoubleFirstClass = doubleFirstClassOnlyNames
+  .filter(name => !existingInstitutionNames.has(normalizeName(name)))
+  .map(name => ({
+    id: `dfc-${normalizeName(name)}`,
+    nameZh: name,
+    nameEn: null,
+    aliases: name === "上海体育大学" ? ["上海体育学院"] : [],
+    classification: "双一流",
+    scoreTier: 2,
+    countryRegion: "中国大陆"
+  }));
+
+export const institutionMaster = [...fromSeed, ...institutionExtras, ...verifiedDoubleFirstClass]
   .filter((item, index, rows) => rows.findIndex(candidate => candidate.id === item.id) === index);
 
 const institutionNames = institutionMaster.flatMap(institution => [
@@ -127,6 +141,8 @@ const institutionNames = institutionMaster.flatMap(institution => [
   ,...(institution.id === "polyu-hk" ? [["香港理工", institution]] : [])
 ]).filter(([name]) => name).map(([name, institution]) => [normalizeName(name), institution]);
 const institutionIndex = new Map(institutionNames);
+
+export const resolveExactInstitution = name => institutionIndex.get(normalizeName(name)) || null;
 
 export function resolveInstitution(name) {
   const normalized = normalizeName(name);

@@ -14,6 +14,7 @@
 - profile.structured 中 internships、researches、awards 等空数组只表示本次表单未披露，不等于申请人确实没有；basis 不得写“无实习”“没有科研”“缺少奖项”等确定性缺失，更不能以此拉低 center。只有申请人明确陈述不存在，或已披露经历的数量/方向与项目要求有可核验的不匹配，才可作为负面证据。
 - 两项目的公开成功案例数量不同，只影响置信度与区间宽度，不得仅因案例少就把该项目的 center 排低；官方资料缺口同样不能自动解释成更难录取。中心值排序必须主要由已知申请背景、官方硬性要求、项目核心方向及可比较的成绩/经历证据支撑。不要把公开成功案例数当作项目竞争强度或录取率。
 - 官方门槛或项目定位没有提供时，只能扩大区间，不能靠常识补齐。
+- 有 academicComparison 时院校已去标识；按 scores 对同一申请与项目输出 academicCenters（elite985、non985211、doubleFirstClass、ordinary）。这是内部参考，非官方换算。四档中心依次不增；案例数仅影响区间和置信度。center、low、high、rank 为 elite985 档，实际档由系统选取。
 
 横向校准：
 - 必须一次性比较全部项目，并为每个项目给出唯一 rank；rank=1 表示本轮相对最有利，不能并列，不能遗漏。
@@ -23,4 +24,4 @@
 - 必须满足 0 <= low <= center <= high <= 100。
 
 只返回 JSON：
-{"probabilities":{"项目id":{"rank":1,"center":63,"low":45,"high":76,"confidence":"high|medium|low","basis":["影响排序的简短证据"]}}}
+{"probabilities":{"项目id":{"rank":1,"center":63,"low":45,"high":76,"confidence":"high|medium|low","basis":["影响排序的简短证据"],"academicCenters":{"elite985":63,"non985211":61,"doubleFirstClass":60,"ordinary":58}}}}

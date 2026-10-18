@@ -130,7 +130,7 @@ try {
   assert.equal(screening.selectedProgrammeIds.includes("cuhk-ee"), true, "Screening must keep known selected programme IDs");
   assert.equal(screening.selectedProgrammeIds.includes("not-real"), false, "Screening must reject unknown programme IDs");
   const broadScreening = normalizeProgrammeScreening({ selectedProgrammeIds: ["cuhk-ee"], programmeDecisions: { "hkust-ee": { decision: "uncertain" }, "cuhk-mae": { decision: "exclude" } } }, screeningContext.retrieved);
-  assert.equal(broadScreening.selectedProgrammeIds.includes("hkust-ee"), true, "Broad screening must keep eligible non-excluded uncertain programmes");
+  assert.equal(broadScreening.selectedProgrammeIds.includes("hkust-ee"), false, "A decision alone must not expand the model's selected shortlist");
   assert.equal(broadScreening.selectedProgrammeIds.includes("cuhk-mae"), false, "Broad screening may exclude an explicitly incompatible programme");
   const conflictScreening = normalizeProgrammeScreening({ selectedProgrammeIds: ["cuhk-ee"], programmeDecisions: { "cuhk-ee": { decision: "exclude" } } }, screeningContext.retrieved);
   assert.equal(conflictScreening.selectedProgrammeIds.includes("cuhk-ee"), false, "Explicit exclusion must override a selected ID");
@@ -143,6 +143,9 @@ try {
   assert.equal(emptyModelScreening.applied, true, "A configured model response must activate the candidate restriction even when it selects zero projects");
   assert.equal(emptyModelScreening.selectedProgrammeIds.length, 0, "A configured model response selecting zero projects must remain empty");
   assert.equal(ensureProgrammeScreeningRecall(emptyModelScreening, screeningContext.retrieved, { requestedFields: ["electronic"] }).selectedProgrammeIds.length, 0, "Recall protection must not override an explicit all-exclude model decision");
+  assert.deepEqual(ensureProgrammeScreeningRecall({ configured: true, applied: true, selectedProgrammeIds: ["cuhk-ee"], decisions: {} },
+    screeningContext.retrieved, { requestedFields: ["electronic", "communication"] }).selectedProgrammeIds,
+  ["cuhk-ee"], "Recall protection must not add projects to a configured model shortlist");
   const computerContext = buildProgrammeScreeningContext({
     profile: { major: "computer", courseTags: ["programming", "data", "ai"] },
     regions: ["香港", "新加坡"], fields: ["computer", "ai"]
@@ -162,12 +165,11 @@ try {
   assert.ok(limited.selectedProgrammeIds.includes("cuhk-cs"), "A direct computer-major match must survive the candidate ceiling");
   assert.ok(limited.selectedProgrammeIds.every(id => computerContext.retrievalById[id].retrieval.eligible), "The local recall guard must not restore programmes outside the requested regions or fields");
   assert.equal(limited.selectedProgrammeIds.includes("ntu-electronics"), false, "A computer applicant must not regain a specialised IC programme through a broad major tag");
-  assert.equal(limited.selectedProgrammeIds.length, 8, "The local cap should pad available eligible candidates to eight projects");
+  assert.equal(limited.selectedProgrammeIds.length, 7, "Only the seven eligible direct model selections should remain");
   assert.ok(modelSelection.filter(id => id !== "ntu-cca" && computerContext.retrievalById[id]?.retrieval.eligible)
-    .every(id => limited.selectedProgrammeIds.includes(id)), "Padding must preserve eligible direct matches");
+    .every(id => limited.selectedProgrammeIds.includes(id)), "The cap must preserve eligible direct matches");
   const shortSelection = limitProgrammeScreening(normalizeProgrammeScreening({ selectedProgrammeIds: ["cuhk-cs", "nus-mcomp-ai"], programmeDecisions: { "cuhk-cs": { decision: "include", directionFit: "direct" }, "nus-mcomp-ai": { decision: "include", directionFit: "direct" } } }, computerContext.retrieved), computerContext.retrieved);
-  assert.equal(shortSelection.selectedProgrammeIds.length, 8, "The first stage should pad an available shortlist to eight projects");
-  assert.ok(shortSelection.selectedProgrammeIds.includes("cuhk-cs") && shortSelection.selectedProgrammeIds.includes("nus-mcomp-ai"), "Padding must preserve model-selected direct matches");
+  assert.deepEqual(shortSelection.selectedProgrammeIds, ["cuhk-cs", "nus-mcomp-ai"], "A two-project shortlist must stay at two");
   const coverageEntries = ["香港大学", "香港中文大学", "香港科技大学", "香港理工大学", "香港城市大学", "香港浸会大学"].map((school, index) => ({
     programme: { id: `coverage-${index}`, school, university: school, majorTags: ["finance"], focusTags: ["finance"] },
     retrieval: { eligible: true, majorMatch: true, score: 10 - index }
@@ -175,8 +177,7 @@ try {
   const covered = limitProgrammeScreening({ applied: true, selectedProgrammeIds: ["coverage-0"], decisions: { "coverage-0": { decision: "include", directionFit: "direct" } } }, coverageEntries, 8, {
     targetSchools: coverageEntries.slice(0, 5).map(entry => entry.programme.university)
   });
-  assert.equal(covered.selectedProgrammeIds.length, 6, "Coverage selection should keep all available projects when fewer than eight exist");
-  assert.ok(coverageEntries.slice(0, 5).every(entry => covered.selectedProgrammeIds.includes(entry.programme.id)), "Coverage selection should retain one project per selected school");
+  assert.deepEqual(covered.selectedProgrammeIds, ["coverage-0"], "Target-school coverage must not add unselected projects");
   const excludedCoverage = limitProgrammeScreening({
     applied: true,
     selectedProgrammeIds: coverageEntries.slice(0, 4).map(entry => entry.programme.id),
@@ -185,8 +186,8 @@ try {
       directionFit: "direct"
     }]))
   }, coverageEntries, 8);
-  assert.equal(excludedCoverage.selectedProgrammeIds.length, 6, "A forced shortlist must use all eligible projects when the model returns fewer than eight");
-  assert.ok(coverageEntries.every(entry => excludedCoverage.selectedProgrammeIds.includes(entry.programme.id)), "Default all-school scope should preserve one eligible project per school");
+  assert.deepEqual(excludedCoverage.selectedProgrammeIds, coverageEntries.slice(0, 4).map(entry => entry.programme.id),
+    "Excluded projects must never be restored to fill eight slots");
   const emptyCandidateContext = buildAnalysisContext({
     profile: { schoolTier: 2, major: "automation", gpaScale: "100", gpaValue: 85, languageTest: "IELTS", language: 7, courseTags: ["math", "control"] },
     regions: ["香港"],

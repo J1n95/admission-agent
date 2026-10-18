@@ -91,18 +91,6 @@ async function runProjectScreening(agent, profile, payload, candidates, fullEvid
   return agent.mergeScreeningResults(results, 8);
 }
 
-function localScreeningFallback(candidates, reason) {
-  const selected = candidates.slice(0, 8);
-  return {
-    selectedProgrammeIds: selected.map(programme => programme.id),
-    programmeDecisions: Object.fromEntries(selected.map(programme => [programme.id, {
-      decision: 'include', directionFit: 'direct', reason: '本地候选排序兜底'
-    }])),
-    configured: false,
-    fallbackReason: String(reason || '项目初筛模型未及时返回')
-  };
-}
-
 async function loadProgrammeCards(candidates) {
   const ids = candidates.map(item => item.id);
   try {
@@ -201,6 +189,7 @@ async function runAgentAssessments(agent, prepared) {
       positioning: String(programme.positioning || '').slice(0, 1000)
     }))
   };
+  const academicCalibration = agent.buildAcademicCalibrationRequest(calibrationInput);
   const [settled, calibrationResult] = await Promise.all([
     Promise.allSettled(prepared.modelInput.programmes.map(programme => requestAgent(
     agent.assessmentPrompt,
@@ -208,7 +197,7 @@ async function runAgentAssessments(agent, prepared) {
     timeoutMs,
     thinking
     ))),
-    requestAgent(agent.probabilityCalibrationPrompt, calibrationInput, calibrationTimeoutMs, thinking)
+    requestAgent(agent.probabilityCalibrationPrompt, academicCalibration.input, calibrationTimeoutMs, thinking)
       .then(value => ({ value })).catch(error => ({ error }))
   ]);
   const assessments = {};
@@ -224,7 +213,7 @@ async function runAgentAssessments(agent, prepared) {
       : '模型未返回项目判断'}`);
   });
   if (calibrationResult.error) errors.push(`横向概率校准:${calibrationResult.error.message || '模型调用失败'}`);
-  return { assessments, calibration: calibrationResult.value || null, errors };
+  return { assessments, calibration: calibrationResult.value || null, academicBand: academicCalibration.band, errors };
 }
 
 async function createAnalysis(payload, openid) {
@@ -261,7 +250,7 @@ async function createAnalysis(payload, openid) {
       cardScreening = await runProjectScreening(agent, analysisProfile, payload, programmeCards);
       if (!cardScreening.selectedProgrammeIds.length) throw new Error('项目初筛模型没有保留候选项目');
     } catch (error) {
-      cardScreening = localScreeningFallback(programmeCards, error.message);
+      throw new Error(`项目初筛失败：${error.message || '模型未及时返回'}`);
     }
 
     const uncertainIds = cardScreening.selectedProgrammeIds
@@ -294,7 +283,10 @@ async function createAnalysis(payload, openid) {
     const prepared = agent.prepareAgentAnalysis(analysisProfile, selectedCandidates, evidenceByProgramme, 6);
     const generated = await runAgentAssessments(agent, prepared);
     const normalizedAssessments = agent.normalizeAgentAssessments(generated.assessments, prepared);
-    const calibration = agent.normalizeProbabilityCalibration(generated.calibration, prepared);
+    const calibration = agent.normalizeProbabilityCalibration(generated.calibration, prepared, generated.academicBand);
+    if (generated.academicBand && Object.keys(calibration).length !== prepared.modelInput.programmes.length) {
+      throw new Error('院校档次横向对照未通过校验，本次不展示未经检查的参考数值。请重试。');
+    }
     const assessments = agent.mergeProbabilityCalibration(normalizedAssessments, calibration, prepared);
     const comparisonProfile = prepared.modelInput.profile.structured;
     const assessmentErrors = [...generated.errors];

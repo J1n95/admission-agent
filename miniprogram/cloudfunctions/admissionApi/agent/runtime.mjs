@@ -160,56 +160,13 @@ export function finalizeProgrammeScreening(cardResult = {}, fullResult = null, c
   for (const [id, value] of Object.entries(cardDecisions)) {
     if (String(value?.decision || '').toLowerCase() === 'uncertain' && fullDecisions[id]) decisions[id] = fullDecisions[id];
   }
-  const explicit = [...new Set([...(cardResult.selectedProgrammeIds || []), ...(fullResult?.selectedProgrammeIds || [])])];
-  const excluded = new Set(Object.entries(decisions)
-    .filter(([, value]) => String(value?.decision || '').toLowerCase() === 'exclude').map(([id]) => id));
-  const direct = new Set(explicit.filter(id => !excluded.has(id)
-    && String(decisions[id]?.directionFit || '').toLowerCase() === 'direct'));
-  const selectedRank = new Map(explicit.map((id, index) => [id, index]));
-  const ranked = [...candidates].sort((a, b) => Number(b._retrieval?.majorMatch) - Number(a._retrieval?.majorMatch)
-    || Number(direct.has(b.id)) - Number(direct.has(a.id))
-    || Number(excluded.has(a.id)) - Number(excluded.has(b.id))
-    || Number(String(decisions[b.id]?.directionFit || '').toLowerCase() === 'uncertain')
-      - Number(String(decisions[a.id]?.directionFit || '').toLowerCase() === 'uncertain')
-    || Number(b._retrieval?.score || 0) - Number(a._retrieval?.score || 0)
-    || (selectedRank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (selectedRank.get(b.id) ?? Number.MAX_SAFE_INTEGER)
-    || a.id.localeCompare(b.id));
-  const selected = new Set();
-  const add = programme => {
-    if (programme && selected.size < maximum) selected.add(programme.id);
-  };
-  ranked.filter(programme => direct.has(programme.id)).forEach(add);
-  for (const school of asStrings(options.targetSchools)) {
-    add(ranked.find(programme => !excluded.has(programme.id)
-      && (programme.university === school || programme.school === school))
-      || ranked.find(programme => programme.university === school || programme.school === school));
-  }
-  ranked.filter(programme => !excluded.has(programme.id)).forEach(add);
-  ranked.forEach(add);
-
-  const requestedFields = asStrings(options.requestedFields).map(value => value.toLowerCase());
-  const represented = field => [...selected].some(id => fieldMatches(candidates.find(item => item.id === id) || {}, field));
-  for (const field of requestedFields) {
-    if (represented(field)) continue;
-    const anchor = ranked.find(programme => !selected.has(programme.id) && fieldMatches(programme, field));
-    if (!anchor) continue;
-    if (selected.size >= maximum) {
-      const replaceable = [...selected].reverse().find(id => requestedFields.every(other => {
-        if (other === field) return true;
-        const matches = [...selected].filter(candidateId => fieldMatches(candidates.find(item => item.id === candidateId) || {}, other));
-        return matches.length !== 1 || matches[0] !== id;
-      }));
-      if (replaceable) selected.delete(replaceable);
-    }
-    add(anchor);
-    decisions[anchor.id] = { decision: 'include', directionFit: 'direct', reason: `本地召回保护：申请人明确选择的${field}方向存在项目候选` };
-  }
-  for (const id of selected) {
-    if (String(decisions[id]?.decision || '').toLowerCase() !== 'include') {
-      decisions[id] = { decision: 'include', directionFit: 'direct', reason: '本地补齐：保证目标学校覆盖并达到项目候选数量' };
-    }
-  }
-  return { selectedProgrammeIds: [...selected], programmeDecisions: decisions, configured: true, applied: true };
+  const available = new Set(candidates.map(programme => programme.id));
+  const selectedProgrammeIds = [...new Set([...(cardResult.selectedProgrammeIds || []), ...(fullResult?.selectedProgrammeIds || [])])]
+    .filter(id => available.has(id)
+      && ['include', 'uncertain'].includes(String(decisions[id]?.decision || '').toLowerCase())
+      && String(decisions[id]?.directionFit || '').toLowerCase() === 'direct')
+    .slice(0, maximum);
+  return { selectedProgrammeIds, programmeDecisions: decisions, configured: true, applied: true };
 }
 
 function clipScreeningText(value, limit) {
@@ -514,7 +471,48 @@ function minimumRange(center, low, high, minimumWidth) {
   return { low: boundedLow, high: boundedHigh };
 }
 
-export function normalizeProbabilityCalibration(value, prepared) {
+const academicBands = ['elite985', 'non985211', 'doubleFirstClass', 'ordinary'];
+
+export function buildAcademicCalibrationRequest(input) {
+  const structured = input?.profile?.structured;
+  const classification = String(structured?.schoolClassification || '');
+  const band = /985/.test(classification) ? 'elite985'
+    : /211/.test(classification) ? 'non985211'
+      : /双一流/.test(classification) ? 'doubleFirstClass'
+        : /双非/.test(classification) ? 'ordinary' : null;
+  const raw = Number(structured?.gpaValue);
+  if (!band || String(structured?.gpaScale) !== '100' || !Number.isFinite(raw)) return { input, band: null };
+  const { university, schoolTier, schoolClassification, gpaStandardization, ...neutralProfile } = structured;
+  const { backgroundCorrection, equivalentScore, ...neutralGpa } = gpaStandardization || {};
+  return {
+    band,
+    input: {
+      ...input,
+      profile: { ...input.profile, structured: { ...neutralProfile, gpaStandardization: neutralGpa }, narrative: null },
+      academicComparison: {
+        note: '同一申请资料的内部985基准比较分；不是官方换算或真实录取率',
+        scores: {
+          elite985: raw,
+          non985211: Math.max(0, raw - 1.5),
+          doubleFirstClass: Math.max(0, raw - 2),
+          ordinary: Math.max(0, raw - 3)
+        }
+      },
+      programmes: (input.programmes || []).map(programme => {
+        const distribution = programme.caseDistribution || {};
+        const { user, rawUser, rank, positionNote, sameTier, sameTierCount, ...caseGpa } = distribution.gpa || {};
+        const { sameTierCount: tierCount, sameTierMajorCount, gpaPercentileAmongSuccessfulCases,
+          ...caseBackground } = distribution.background || {};
+        return {
+          ...programme,
+          caseDistribution: { ...distribution, gpa: caseGpa, background: caseBackground }
+        };
+      })
+    }
+  };
+}
+
+export function normalizeProbabilityCalibration(value, prepared, academicBand = null) {
   const programmes = prepared?.modelInput?.programmes || [];
   const raw = value?.probabilities;
   if (!raw || typeof raw !== 'object') return {};
@@ -530,34 +528,52 @@ export function normalizeProbabilityCalibration(value, prepared) {
       && [...basis.matchAll(pattern)].some(match => !/^(?:\s*\/\s*(?:科研|研究))?\s*(?:经历)?(?:填写|披露|资料|信息|记录)/.test(
         basis.slice(match.index + match[0].length))));
     if (missingExperienceClaim) return null;
-    const center = Math.round(Number(item?.center));
-    const low = Number(item?.low);
-    const high = Number(item?.high);
+    const academicCenters = academicBand ? academicBands.map(band => Number(item?.academicCenters?.[band])) : null;
+    if (academicCenters && academicCenters.some(center => !Number.isFinite(center) || center < 0 || center > 100)) return null;
+    let academicMonotonicAdjusted = false;
+    if (academicCenters) {
+      for (let index = 1; index < academicCenters.length; index += 1) {
+        if (academicCenters[index] > academicCenters[index - 1]) academicMonotonicAdjusted = true;
+        academicCenters[index] = Math.min(academicCenters[index], academicCenters[index - 1]);
+      }
+    }
+    const baseCenter = Math.round(Number(item?.center));
+    const center = Math.round(academicCenters ? academicCenters[academicBands.indexOf(academicBand)] : baseCenter);
+    const shift = center - baseCenter;
+    const low = Math.max(0, Number(item?.low) + shift);
+    const high = Math.min(100, Number(item?.high) + shift);
     const rank = Number(item?.rank);
-    if (![center, low, high, rank].every(Number.isFinite)
-      || center < 0 || center > 100 || low < 0 || low > center || center > high || high > 100) return null;
-    return { programme, item, center, low, high, rank };
+    if (![baseCenter, center, low, high, rank].every(Number.isFinite)
+      || baseCenter < 0 || baseCenter > 100 || Number(item?.low) < 0
+      || Number(item?.low) > baseCenter || baseCenter > Number(item?.high) || Number(item?.high) > 100
+      || center < 0 || center > 100 || low > center || center > high) return null;
+    return { programme, item, center, low, high, rank, academicMonotonicAdjusted };
   });
   if (rows.some(row => !row)) return {};
   const ranks = rows.map(row => row.rank);
   if (new Set(ranks).size !== rows.length || ranks.some(rank => !Number.isInteger(rank) || rank < 1 || rank > rows.length)) return {};
 
-  const ordered = [...rows].sort((left, right) => left.rank - right.rank);
-  for (let index = 1; index < ordered.length; index += 1) {
-    if (ordered[index].center >= ordered[index - 1].center) {
-      ordered[index].center = Math.max(0, ordered[index - 1].center - 1);
+  const ordered = [...rows].sort(academicBand
+    ? (left, right) => right.center - left.center || left.rank - right.rank
+    : (left, right) => left.rank - right.rank);
+  if (!academicBand) {
+    for (let index = 1; index < ordered.length; index += 1) {
+      if (ordered[index].center >= ordered[index - 1].center) {
+        ordered[index].center = Math.max(0, ordered[index - 1].center - 1);
+      }
     }
   }
-  return Object.fromEntries(ordered.map(({ programme, item, center, low, high, rank }) => {
+  return Object.fromEntries(ordered.map(({ programme, item, center, low, high, rank, academicMonotonicAdjusted }, index) => {
     const caseCount = Number(programme.caseDistribution?.caseCount || 0);
     const minimumWidth = caseCount === 0 ? 45 : caseCount <= 2 ? 36 : caseCount <= 5 ? 28 : 20;
     const range = minimumRange(center, Math.min(low, center), Math.max(high, center), minimumWidth);
     return [programme.id, {
-      rank,
+      rank: academicBand ? index + 1 : rank,
       center,
       ...range,
-      confidence: caseCount < 5 ? 'low' : ['high', 'medium', 'low'].includes(item.confidence) ? item.confidence : 'medium',
+      confidence: academicMonotonicAdjusted || caseCount < 5 ? 'low' : ['high', 'medium', 'low'].includes(item.confidence) ? item.confidence : 'medium',
       basis: asStrings(item.basis),
+      academicMonotonicAdjusted,
       evidenceMode: caseCount === 0 ? 'ai-project-profile-only' : caseCount < 5 ? 'ai-limited-cases' : 'ai-full-case-summary'
     }];
   }));
@@ -579,6 +595,8 @@ export function mergeProbabilityCalibration(assessments, calibration, prepared) 
       : caseCount < 5
         ? `该项目仅有 ${caseCount} 条公开成功案例，只能作为个别样本，置信度较低。`
         : '';
+    const academicUncertainty = calibrated?.academicMonotonicAdjusted
+      ? '模型的院校档次对照顺序不一致，已按同条件比较约束修正；参考数值的置信度较低。' : '';
     return [programmeId, {
       ...assessment,
       ...(!calibrated ? fallbackRange : {
@@ -587,7 +605,7 @@ export function mergeProbabilityCalibration(assessments, calibration, prepared) 
       }),
       confidence: calibrated?.confidence || (caseCount < 5 ? 'low' : 'medium'),
       evidenceMode,
-      uncertainties: [...new Set([...(assessment.uncertainties || []), uncertainty].filter(Boolean))]
+      uncertainties: [...new Set([...(assessment.uncertainties || []), uncertainty, academicUncertainty].filter(Boolean))]
     }];
   }));
 }

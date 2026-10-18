@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildProgrammeSearchProfile, inferProgrammeFocus, institutionMaster, programmeMaster, resolveInstitution, resolveProgramme, undergraduateInstitutionEvidence } from "./master-data.mjs";
+import { buildProgrammeSearchProfile, inferProgrammeFocus, institutionMaster, programmeMaster, resolveExactInstitution, resolveInstitution, resolveProgramme, undergraduateInstitutionEvidence } from "./master-data.mjs";
 
 const packagedResources = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")).build.extraResources;
 assert.ok(packagedResources.some(resource => resource.from === "collector/data/programme-catalogue.json"), "Desktop package must include the full programme catalogue");
@@ -20,6 +20,10 @@ assert.equal(resolveInstitution("广东工业大学")?.scoreTier, 1);
 assert.equal(resolveInstitution("西安电子科技大学")?.scoreTier, 2);
 assert.equal(resolveInstitution("北京理工大学")?.scoreTier, 3);
 assert.equal(resolveInstitution("南京邮电大学")?.scoreTier, 2);
+for (const name of ["成都理工大学", "南京信息工程大学", "河南大学", "湘潭大学"]) {
+  assert.equal(resolveExactInstitution(name)?.classification, "双一流", `${name} must use the verified non-211 Double First-Class tier`);
+}
+assert.equal(resolveExactInstitution("成都理工大学工程技术学院"), null, "A separate college must not inherit its parent university tier");
 assert.equal(resolveInstitution("俄亥俄州立大学")?.id, "ohio-state");
 assert.equal(resolveProgramme({ universityName: "香港中文大学", programmeName: "电子工程理学硕士" })?.id, "cuhk-ee");
 assert.equal(resolveProgramme({ universityName: "CUHK", programmeEnglishName: "MSc in Electronic Engineering" })?.nameEn, "MSc in Electronic Engineering");

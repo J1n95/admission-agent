@@ -38,6 +38,14 @@ try {
   const displayModule = await fetch(`${origin}/display-evidence.mjs`, { headers });
   assert.equal(displayModule.status, 200);
   assert.match(await displayModule.text(), /readableEvidenceIds/);
+  const schoolTierModule = await fetch(`${origin}/verified-double-first-class.mjs`, { headers });
+  assert.equal(schoolTierModule.status, 200, 'The page must load the school-tier module imported by case-analysis');
+  assert.match(await schoolTierModule.text(), /verified-double-first-class/);
+  const schoolTierData = await fetch(`${origin}/miniprogram/cloudfunctions/admissionApi/agent/verified-double-first-class.mjs`, { headers });
+  assert.equal(schoolTierData.status, 200, 'The re-exported school-tier data must also be public');
+  assert.match(await schoolTierData.text(), /doubleFirstClassOnlyNames/);
+  const institutions = await (await fetch(`${origin}/api/institutions/search?q=${encodeURIComponent('成都理工大学')}`, { headers })).json();
+  assert.ok(institutions.results.some(item => item.nameZh === '成都理工大学' && item.classification === '双一流'));
 
   database = new DatabaseSync(join(directory, 'cases.sqlite'));
   database.prepare("INSERT INTO analysis_records (id, status, applicant_json, created_at) VALUES ('desktop-test', 'complete', '{}', '2026-01-01')").run();

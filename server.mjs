@@ -11,7 +11,7 @@ import { completeAnalysisRecord, createAnalysisRecord, listAgentRuns, listAnalys
 import { triageRows } from "./collector/review-engine.mjs";
 import { isCorroboratedReview, normalizeReviewDecision, reviewInput } from "./collector/review-agent.mjs";
 import { DEFAULT_APPROVED_TARGET, programmeCollectionEligibility, programmeSearchEvidence } from "./collector/programme-eligibility.mjs";
-import { institutionMaster, programmeMaster, resolveInstitution } from "./master-data.mjs";
+import { institutionMaster, programmeMaster, resolveExactInstitution, resolveInstitution } from "./master-data.mjs";
 import { majorMaster } from "./major-master.mjs";
 import { buildProfileEmbeddingText, requestEmbeddings, resolveEmbeddingSettings } from "./collector/vector-search.mjs";
 import { standardizeGpa } from "./case-analysis.mjs";
@@ -140,7 +140,7 @@ const mime = {
 };
 const publicAssets = new Set([
   "/", "/index.html", "/styles.css", "/favicon.svg", "/robots.txt",
-  "/app.mjs", "/comparison.mjs", "/data.mjs", "/case-analysis.mjs", "/display-evidence.mjs", "/major-master.mjs",
+  "/app.mjs", "/comparison.mjs", "/data.mjs", "/case-analysis.mjs", "/verified-double-first-class.mjs", "/miniprogram/cloudfunctions/admissionApi/agent/verified-double-first-class.mjs", "/display-evidence.mjs", "/major-master.mjs",
   "/admin.html", "/admin.mjs"
 ]);
 const adminAssets = new Set(["/review.html", "/review.mjs", "/review.css", "/analytics.html", "/analytics.mjs", "/analytics.css"]);
@@ -669,26 +669,6 @@ async function generateProgrammeScreening(input) {
   };
 }
 
-function fallbackProgrammeScreening(entries, maximum = 8) {
-  const candidates = entries
-    .filter(entry => entry.retrieval.eligible)
-    .sort((a, b) => Number(b.retrieval.majorMatch) - Number(a.retrieval.majorMatch)
-      || (b.retrieval.matchedFields?.length || 0) - (a.retrieval.matchedFields?.length || 0)
-      || b.retrieval.score - a.retrieval.score
-      || a.programme.id.localeCompare(b.programme.id))
-    .slice(0, maximum);
-  return {
-    selectedProgrammeIds: candidates.map(entry => entry.programme.id),
-    programmeDecisions: Object.fromEntries(candidates.map(entry => [entry.programme.id, {
-      decision: "include",
-      directionFit: "direct",
-      reason: "模型筛选不可用，按申请地区、方向、本科专业贴合度和课程标签进行本地候选兜底"
-    }])),
-    configured: false,
-    fallback: true
-  };
-}
-
 async function generateAssessments(input) {
   if (!aiUrl || !aiKey || !aiModel) {
     return { assessments: {}, configured: false };
@@ -863,7 +843,7 @@ async function analyze(request, response) {
       ? ["integrated-circuit"]
       : [];
     const requestedFields = [...new Set([...(input.fields || []), ...impliedFields])];
-    const institution = resolveInstitution(input.profile?.university);
+    const institution = resolveExactInstitution(input.profile?.university);
     if (institution?.scoreTier != null) input.profile = {
       ...input.profile,
       schoolTier: institution.scoreTier,
@@ -887,6 +867,7 @@ async function analyze(request, response) {
     let screeningGenerated = { selectedProgrammeIds: [], programmeDecisions: {}, configured: false };
     let screeningError = "";
     const screeningConfigured = Boolean(aiUrl && aiKey && aiModel);
+    if (!screeningConfigured) throw new Error("请先配置模型 API，未进行项目筛选；不会用本地候选冒充推荐结果。");
     if (screeningConfigured && !screeningInput.projects.length) {
       screeningError = "第一层候选项目卡片为空，无法进行模型筛选";
       screeningGenerated = { selectedProgrammeIds: [], programmeDecisions: {}, configured: true, modelFailed: true };
@@ -904,15 +885,6 @@ async function analyze(request, response) {
       8,
       { targetSchools: input.targetSchools || [] }
     );
-    if (!screeningConfigured && (!preliminaryScreening.applied || !preliminaryScreening.selectedProgrammeIds.length)) {
-      screeningGenerated = fallbackProgrammeScreening(screeningContext.retrieved);
-      preliminaryScreening = limitProgrammeScreening(
-        { ...normalizeProgrammeScreening(screeningGenerated, screeningContext.retrieved), profileMajor: input.profile?.major },
-        screeningContext.retrieved,
-        8,
-        { targetSchools: input.targetSchools || [] }
-      );
-    }
     const uncertainIds = Object.entries(screeningGenerated.programmeDecisions || {})
       .filter(([, value]) => String(value?.decision || value || "").toLowerCase() === "uncertain")
       .map(([id]) => id)

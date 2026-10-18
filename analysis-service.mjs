@@ -172,12 +172,7 @@ export function normalizeProgrammeScreening(value, availableEntries = []) {
     .filter(([, decision]) => decision === "exclude")
     .map(([id]) => id));
   const selectedProgrammeIds = hasUsableSelection
-    ? [...new Set([
-      ...explicitIds.filter(id => !excludedIds.has(id)),
-      ...decisionEntries
-        .filter(([, decision]) => decision === "include" || decision === "uncertain")
-        .map(([id]) => id)
-    ])]
+    ? [...new Set(explicitIds.filter(id => !excludedIds.has(id)))]
     : configured ? [] : availableIds;
   return {
     selectedProgrammeIds,
@@ -187,57 +182,22 @@ export function normalizeProgrammeScreening(value, availableEntries = []) {
   };
 }
 
-export function limitProgrammeScreening(screening, availableEntries = [], maximum = 8, { targetSchools = [] } = {}) {
+export function limitProgrammeScreening(screening, availableEntries = [], maximum = 8) {
   if (!screening?.applied) return { ...screening, selectedProgrammeIds: [] };
-  const directionFit = id => String(screening.decisions?.[id]?.directionFit || "").toLowerCase();
-  const decision = id => String(screening.decisions?.[id]?.decision || "").toLowerCase();
-  const excluded = new Set(Object.entries(screening.decisions || {})
-    .filter(([, value]) => String(value?.decision || value || "").toLowerCase() === "exclude")
-    .map(([id]) => id));
-  const selectedDirect = new Set((screening.selectedProgrammeIds || [])
-    .filter(id => directionFit(id) === "direct" && !excluded.has(id)));
-  const selectedRank = new Map((screening.selectedProgrammeIds || []).map((id, index) => [id, index]));
-  const candidates = availableEntries
-    .filter(entry => entry.retrieval.eligible)
-    .sort((a, b) => Number(b.retrieval.majorMatch) - Number(a.retrieval.majorMatch)
-      || Number(selectedDirect.has(b.programme.id)) - Number(selectedDirect.has(a.programme.id))
-      || Number(excluded.has(a.programme.id)) - Number(excluded.has(b.programme.id))
-      || Number(directionFit(b.programme.id) === "uncertain") - Number(directionFit(a.programme.id) === "uncertain")
-      || b.retrieval.score - a.retrieval.score
-      || (selectedRank.get(a.programme.id) ?? Number.MAX_SAFE_INTEGER) - (selectedRank.get(b.programme.id) ?? Number.MAX_SAFE_INTEGER)
-      || Number(b.retrieval.eligible) - Number(a.retrieval.eligible)
-      || a.programme.id.localeCompare(b.programme.id));
-  const selected = new Set();
-  const add = entry => {
-    if (entry && selected.size < maximum) selected.add(entry.programme.id);
-  };
-  const bySchool = school => candidates.find(entry => !excluded.has(entry.programme.id)
-    && (entry.programme.university === school || entry.programme.school === school))
-    || candidates.find(entry => entry.programme.university === school || entry.programme.school === school);
-  const requestedSchools = [...new Set((targetSchools.length
-    ? targetSchools
-    : candidates.map(entry => entry.programme.university || entry.programme.school))
-    .map(String).map(value => value.trim()).filter(Boolean))];
-  for (const entry of candidates.filter(entry => selectedDirect.has(entry.programme.id))) add(entry);
-  for (const school of requestedSchools) add(bySchool(school));
-  for (const entry of candidates.filter(entry => !excluded.has(entry.programme.id))) add(entry);
-  for (const entry of candidates) add(entry);
-  const paddedDecisions = Object.fromEntries([...selected]
-    .filter(id => decision(id) !== "include")
-    .map(id => [id, {
-      decision: "include",
-      directionFit: "direct",
-      reason: requestedSchools.length ? "本地补齐：保证目标学校覆盖并达到八个项目候选" : "本地补齐：达到八个项目候选"
-    }]));
+  const eligible = new Set(availableEntries.filter(entry => entry.retrieval.eligible).map(entry => entry.programme.id));
+  const selectedProgrammeIds = [...new Set(screening.selectedProgrammeIds || [])]
+    .filter(id => eligible.has(id)
+      && String(screening.decisions?.[id]?.decision || '').toLowerCase() !== 'exclude'
+      && !['adjacent', 'weak'].includes(String(screening.decisions?.[id]?.directionFit || '').toLowerCase()))
+    .slice(0, maximum);
   return {
     ...screening,
-    decisions: { ...(screening.decisions || {}), ...paddedDecisions },
-    selectedProgrammeIds: [...selected]
+    selectedProgrammeIds
   };
 }
 
 export function ensureProgrammeScreeningRecall(screening, availableEntries = [], { profileMajor = null, requestedFields = [], maximum = 8 } = {}) {
-  if (screening?.configured && screening?.applied && !(screening.selectedProgrammeIds || []).length) {
+  if (screening?.configured) {
     return { ...screening, recallProtected: false };
   }
   const decisions = { ...(screening?.decisions || {}) };

@@ -21,6 +21,8 @@ async function run() {
   const expandedDiscipline = process.argv.includes("--cross-discipline-expanded");
   const gpaFiveReview = process.argv.includes("--gpa-five-review");
   const gpaCompare = process.argv.includes("--gpa-compare");
+  const schoolTierSmoke = process.argv.includes("--school-tier-smoke");
+  const nonEliteSweep = process.argv.includes("--non-elite-sweep");
   const settingsPath = join(app.getPath("userData"), "settings.json");
   const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
   const configuration = settings.experiment?.deepseek;
@@ -30,8 +32,8 @@ async function run() {
     ? [join(root, "collector", "agent.mjs"), "collect", "https://www.mastermate.cn/admission/9576",
       "--programme-id=cuhk-master-of-laws-in-energy-and-environmental-law", "--dry-run", "--force-refresh"]
     : [join(root, "eval", "model-ab.mjs"), "--run",
-      gpaCompare ? "--gpa-compare" : gpaFiveReview ? "--gpa-five-review" : expandedDiscipline ? "--cross-discipline-expanded" : crossDiscipline ? "--cross-discipline" : "--deepseek-review",
-      gpaCompare || crossDiscipline || expandedDiscipline ? "--max-cny=2" : "--max-cny=1"];
+      nonEliteSweep ? "--non-elite-sweep" : schoolTierSmoke ? "--school-tier-smoke" : gpaCompare ? "--gpa-compare" : gpaFiveReview ? "--gpa-five-review" : expandedDiscipline ? "--cross-discipline-expanded" : crossDiscipline ? "--cross-discipline" : "--deepseek-review",
+      nonEliteSweep ? "--max-cny=5" : gpaCompare || crossDiscipline || expandedDiscipline ? "--max-cny=2" : "--max-cny=1"];
   const child = spawn(process.execPath, childArgs, {
     cwd: root,
     windowsHide: true,
