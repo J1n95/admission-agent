@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="基于官方要求和公开案例的港新硕士录取概率分析原型">
+  <meta name="description" content="基于官方要求和公开案例的港新硕士申请评估桌面程序">
   <title>录取参照</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css?v=20260816-2">
@@ -15,9 +15,10 @@
     <div class="header-tools">
       <nav aria-label="页面步骤">
         <button class="nav-item is-active" type="button" data-view-target="input">基础信息</button>
-        <button class="nav-item" type="button" data-view-target="results" disabled>概率档案</button>
+        <button class="nav-item" type="button" data-view-target="results" disabled>申请评估</button>
       </nav>
-      <a class="admin-link" href="/admin.html">管理员入口</a>
+      <button id="desktop-model-settings" class="admin-link header-action" type="button" hidden>模型 API 设置</button>
+      <a class="admin-link" href="/review.html">案例采集与审核</a>
     </div>
   </header>
 
@@ -70,9 +71,9 @@
               <label for="gpa-scale">成绩制式</label>
               <select id="gpa-scale" name="gpaScale" required>
                 <option value="" selected>请选择成绩制式</option>
-                <option value="100">百分制 / 加权平均分</option>
-                <option value="4">四分制 GPA</option>
-                <option value="5">五分制 GPA</option>
+                <option value="100">百分制 / 加权平均分（推荐）</option>
+                <option value="4">四分制 GPA（效果不佳）</option>
+                <option value="5">五分制 GPA（效果不佳）</option>
               </select>
             </div>
             <div class="field">
@@ -220,16 +221,16 @@
         <div class="submit-row">
           <div class="submit-copy">
             <p>默认读取港八新二主表中的全部硕士项目，也可以按地区和方向缩小范围。</p>
-            <label class="data-consent"><input type="checkbox" required><span>我已了解填写信息、分析结果和问卷反馈将被保存，用于改进本服务。</span></label>
+            <label class="data-consent"><input type="checkbox" required><span>我了解申请资料和分析记录保存在本机，分析时会发送给我配置的模型服务商；本程序不向作者服务器上传申请资料。本机记录可在应用菜单中删除。</span></label>
           </div>
-          <button class="primary-button" type="submit">生成概率档案</button>
+          <button class="primary-button" type="submit">生成申请评估</button>
         </div>
       </form>
     </section>
 
     <section class="page processing-page" data-view="processing" hidden aria-live="polite">
       <header class="processing-heading">
-        <span>概率档案生成中</span>
+        <span>申请评估生成中</span>
         <h1 id="processing-title">正在读取申请背景</h1>
         <p id="processing-status">验证成绩、课程与经历信息。</p>
       </header>
@@ -240,29 +241,42 @@
         <li data-stage="profile"><span>01</span>核对申请背景</li>
         <li data-stage="rag"><span>02</span>检索项目与案例库</li>
         <li data-stage="evidence"><span>03</span>整理案例证据</li>
-        <li data-stage="ai"><span>04</span>生成概率与个性化分析</li>
-        <li data-stage="archive"><span>05</span>整理概率档案</li>
+        <li data-stage="ai"><span>04</span>生成项目与个人背景分析</li>
+        <li data-stage="archive"><span>05</span>整理申请评估</li>
       </ol>
-      <p id="processing-note" class="processing-note">本地只整理可核查证据；概率由AI读取RAG证据后生成。</p>
+      <p id="processing-note" class="processing-note">项目资料和案例在本机读取；申请背景将发送给你配置的模型服务商。</p>
     </section>
 
     <section class="page" data-view="results" hidden>
       <header class="results-heading">
         <div>
-          <h1>概率档案</h1>
+          <h1>申请评估</h1>
           <p id="results-subtitle"></p>
         </div>
         <button class="text-button" type="button" data-view-target="input">修改信息</button>
       </header>
       <div class="result-intro">
-        <p class="result-note">概率来自申请背景与公开案例的对比，仅供申请人自行判断，不代表学校承诺。</p>
+        <p class="result-note">公开案例只有成功样本，模型数值未经录取与拒录数据校准，不能视为真实录取率。请优先核对项目要求、相似案例和信息缺口。</p>
+        <div id="comparison-summary" class="comparison-summary" aria-live="polite"></div>
       </div>
       <div id="results-list" class="results-list"></div>
 
+      <div id="download-panel" class="download-panel" hidden>
+        <p>可直接下载；反馈完全自愿，不影响使用。</p>
+        <div class="result-actions">
+          <label for="export-format">导出格式</label>
+          <select id="export-format">
+            <option value="txt">TXT</option>
+            <option value="md">Markdown</option>
+            <option value="csv">CSV</option>
+          </select>
+          <button class="secondary-button" id="download-report" type="button">下载摘要</button>
+        </div>
+      </div>
       <section class="survey-section" aria-labelledby="survey-title">
         <header>
-          <h2 id="survey-title">下载前完成简短问卷</h2>
-          <p>三道选择题用于改进结果呈现；补充建议可不填。</p>
+          <h2 id="survey-title">可选反馈</h2>
+          <p>若愿意帮助改进，请回答三道选择题。跳过不会影响下载。</p>
         </header>
         <form id="survey-form" class="survey-form">
           <fieldset>
@@ -276,7 +290,7 @@
           <fieldset>
             <legend>你最看重哪部分？</legend>
             <div class="choice-row">
-              <label class="choice"><input type="radio" name="valuable" value="probability" required><span>概率判断</span></label>
+              <label class="choice"><input type="radio" name="valuable" value="boundaries" required><span>判断边界</span></label>
               <label class="choice"><input type="radio" name="valuable" value="cases"><span>公开案例</span></label>
               <label class="choice"><input type="radio" name="valuable" value="programme"><span>项目分析</span></label>
               <label class="choice"><input type="radio" name="valuable" value="gaps"><span>差距建议</span></label>
@@ -292,20 +306,9 @@
           </fieldset>
           <label class="survey-comment" for="survey-comment"><span>其他建议（选填）</span><textarea id="survey-comment" name="comment" rows="3" maxlength="2000"></textarea></label>
           <p id="survey-status" class="form-error" role="alert" hidden></p>
-          <button class="primary-button" type="submit">提交并解锁下载</button>
+          <button class="secondary-button" type="submit">提交反馈</button>
         </form>
-        <div id="download-panel" class="download-panel" hidden>
-          <p>问卷已提交并与本次分析记录关联。</p>
-          <div class="result-actions">
-            <label for="export-format">导出格式</label>
-            <select id="export-format">
-              <option value="txt">TXT</option>
-              <option value="md">Markdown</option>
-              <option value="csv">CSV</option>
-            </select>
-            <button class="secondary-button" id="download-report" type="button">下载摘要</button>
-          </div>
-        </div>
+        <p id="feedback-saved" class="feedback-saved" hidden>反馈已保存在本机。</p>
       </section>
     </section>
   </main>

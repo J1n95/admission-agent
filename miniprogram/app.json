@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/results/results"
+  ],
+  "window": {
+    "navigationBarTitleText": "港新硕士申请",
+    "navigationBarBackgroundColor": "#f7f7f5",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f7f5",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

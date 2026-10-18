@@ -13,6 +13,7 @@ main { max-width:1380px; margin:0 auto; padding:42px clamp(20px, 4vw, 64px) 90px
 button, select { border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:9px 12px; font:inherit; cursor:pointer; }
 button:hover { background:var(--ink); color:#fff; }
 button:disabled { cursor:wait; opacity:.45; }
+:is(button, select, input, a, summary):focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
 .summary { display:flex; gap:24px; padding:22px 0; border-bottom:1px solid var(--line); font-size:14px; }
 .summary strong { display:block; font-size:25px; }
 .topbar-actions { display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:14px; font-size:12px; }
@@ -24,6 +25,15 @@ button:disabled { cursor:wait; opacity:.45; }
 .collector-panel details[open] summary { border-bottom:1px solid var(--line); }
 .collector-panel > details > p,.collector-panel > details > form,.collector-panel > details > pre { margin-left:12px; margin-right:12px; }
 .collector-form { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; padding-top:12px; }
+.collector-programmes { grid-column:1 / -1; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 12px; border:1px solid var(--line); padding:12px; margin:0 0 4px; }
+.collector-programmes legend { padding:0 6px; font-size:12px; font-weight:600; }
+.collector-programmes label,.collector-programmes input,.collector-programmes select,.collector-programmes .programme-selected,.collector-programmes p { grid-column:1 / -1; }
+.collector-programmes input { width:100%; min-height:44px; border:1px solid var(--line); padding:8px; background:#fff; font:inherit; }
+.collector-programmes select { width:100%; min-height:128px; border:1px solid var(--line); background:#fff; padding:6px; }
+.collector-programmes #collector-programme-add { grid-column:1; justify-self:start; min-height:44px; }
+.collector-programmes .programme-selected { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:12px; }
+.programme-selected button { padding:5px 8px; font-size:12px; }
+.collector-programmes p { margin:0; }
 .collector-scope { grid-column:1 / -1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; border:1px solid var(--line); padding:12px; margin:0 0 4px; }
 .collector-scope legend { padding:0 6px; font-size:12px; font-weight:600; }
 .collector-scope label { display:grid; gap:5px; color:var(--muted); font-size:11px; }

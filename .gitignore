@@ -30,3 +30,9 @@ outputs/db-inspect/
 work/
 .env
 *.log
+miniprogram/cloud-data/
+miniprogram/project.private.config.json
+build/desktop-seed/
+build/desktop-smoke-profile/
+release/
+node_modules/

@@ -217,12 +217,12 @@ try {
   };
   assert.deepEqual(
     selectAssessmentEvidence(stableEvidenceEntry, { nearest: { fingerprint: "old" } }).map(document => document.id),
-    ["case:new", "case:middle", "case:old"],
-    "Evidence selection must prioritize newer case years before nearest-case ties"
+    ["case:old", "case:new", "case:middle"],
+    "Evidence selection must keep the nearest case first, then order the remaining cases by recency"
   );
   assert.deepEqual(
     selectAssessmentEvidence(stableEvidenceEntry, { nearest: { fingerprint: "old" } }).map(document => document.id),
-    ["case:new", "case:middle", "case:old"],
+    ["case:old", "case:new", "case:middle"],
     "Repeated evidence selection must return the same document IDs"
   );
   assert.ok(programmeMaster.every(programme => !Object.hasOwn(programme, "cases")), "Static programme metadata must not contain analysis cases");

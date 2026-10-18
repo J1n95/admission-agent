@@ -1,5 +1,21 @@
 import assert from "node:assert/strict";
+import { openCaseStore } from "./store.mjs";
 import { allocateSearchSourceLimit, allocateSearchSourceRotationLimit, anchoredProgrammeId, applyCriticalVerification, assessBatchQuality, buildCaseSearchQuery, buildLowCoverageProgrammePlans, buildOcrRequestBody, buildProgrammeCollectionPlan, buildSearchPlannerRequest, buildSourceCandidates, cachedCasesMatchProgrammes, candidatesForQueue, canonicalizeCandidateUrl, classifyProgrammeScope, classifyProgrammeStatus, crawlSourceNeedsAttempt, criticalVerificationReasons, discoverCompassCaseCandidates, discoverEntryLinks, discoverHksgCaseCandidates, discoverMastermateCaseCandidates, discoverSeedCaseCandidates, discoverLinks, extractImageUrls, extractStructuredCasesForSource, fallbackTargetHeadingHits, filterCandidatesForProgramme, filterCandidatesForProgrammes, inferCriticalOfferYear, inferGpaScale, inferOfferYear, inferSourcePublishedAt, isCoreEngineeringProgramme, mergeProgrammeJobs, normalizeCandidate, normalizeOcrResponseText, parseCompassDetailCandidates, parseCompassIndexCandidates, parseHksgLinkCandidates, parseSeedCaseCandidates, parseSearchResultUrls, planNextAgentAction, preparePageTextForSource, programmeCollectionAllowed, programmeScopeAllowed, recoverGpaFromSourceText, resolveHksgIndexedProgramme, resolveOfferYear, robotsAllowsText, scoreHksgIndexedCaseForProgramme, scoreMastermateIndexedCaseForProgramme, scorePageForExtraction, scoreSearchCandidate, searchQueryVariants, shouldSkipPagePrefilter, stripHtml, validateExtractionPayload, validateSearchPlan, verifyCandidateAgainstText } from "./agent.mjs";
+
+const selectedProjectDb = openCaseStore(":memory:");
+try {
+  const selectedPlans = buildLowCoverageProgrammePlans({ db: selectedProjectDb, programmeIds: ["cuhk-ee", "hkust-ee"], limit: 20 });
+  assert.deepEqual(new Set(selectedPlans.map(plan => plan.programmeId)), new Set(["cuhk-ee", "hkust-ee"]), "Explicit collection must not expand to other programmes");
+  const sourceStatement = selectedProjectDb.prepare("INSERT INTO crawl_source_scopes (source_url, programme_id, status, first_seen_at, last_checked_at) VALUES (?, 'cuhk-ee', 'completed', '2026-01-01', '2026-01-01')");
+  for (let index = 0; index < 12; index += 1) sourceStatement.run(`https://source${index % 3}.example.com/case/${index}`);
+  const runStatement = selectedProjectDb.prepare("INSERT INTO agent_runs (id, goal_json, state, started_at, report_json) VALUES (?, '{\"programmeId\":\"cuhk-ee\"}', 'completed', ?, '{\"errors\":0,\"pagesAttempted\":1}')");
+  runStatement.run("no-progress-1", "2026-01-01");
+  runStatement.run("no-progress-2", "2026-01-02");
+  assert.equal(buildLowCoverageProgrammePlans({ db: selectedProjectDb, institutionIds: ["cuhk"], limit: 200 }).some(plan => plan.programmeId === "cuhk-ee"), false, "Automatic collection must skip exhausted projects");
+  assert.equal(buildLowCoverageProgrammePlans({ db: selectedProjectDb, programmeIds: ["cuhk-ee"], limit: 20 }).some(plan => plan.programmeId === "cuhk-ee"), true, "Explicit selection may retry an exhausted project");
+} finally {
+  selectedProjectDb.close();
+}
 
 const statusProgramme = { id: "cityu-hk-msc-cybersecurity", institutionId: "cityu-hk", nameEn: "MSc Cybersecurity", nameZh: "MSc Cybersecurity" };
 assert.equal(classifyProgrammeStatus({ programme: statusProgramme, officialUrl: "https://www.cityu.edu.hk/en/pg/programme/p91", finalUrl: "https://www.cityu.edu.hk/en/pg/programme/p91", httpStatus: 200, html: "<title>City University of Hong Kong MSc Cybersecurity</title><p>2026/27 admission</p>" }).status, "current-history-unknown");

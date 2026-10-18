@@ -17,12 +17,14 @@ import { classifyExperienceRecords } from "./experience-classifier.mjs";
 
 const collectorRoot = dirname(fileURLToPath(import.meta.url));
 try { process.loadEnvFile(resolve(collectorRoot, "..", ".env")); } catch (error) { if (error.code !== "ENOENT") throw error; }
-const defaultConfigPath = resolve(collectorRoot, "sources.json");
+const collectorDataDir = resolve(process.env.ADMISSION_DATA_DIR || resolve(collectorRoot, "data"));
+const collectorConfigDir = resolve(process.env.ADMISSION_COLLECTOR_CONFIG_DIR || resolve(collectorRoot, "data"));
+const defaultConfigPath = resolve(process.env.ADMISSION_COLLECTOR_CONFIG_DIR || collectorRoot, "sources.json");
 const defaultExtractionPromptPath = resolve(collectorRoot, "prompts", "extraction-system.txt");
-const searchPlannerCachePath = resolve(collectorRoot, "data", "search-plans.json");
-const compassIndexCachePath = resolve(collectorRoot, "data", "compass-index.json");
-const programmeStatusOverridesPath = resolve(collectorRoot, "data", "programme-status-overrides.json");
-const defaultRawLogPath = resolve(collectorRoot, "data", "raw-cases.jsonl");
+const searchPlannerCachePath = resolve(collectorDataDir, "search-plans.json");
+const compassIndexCachePath = resolve(collectorDataDir, "compass-index.json");
+const programmeStatusOverridesPath = resolve(collectorConfigDir, "programme-status-overrides.json");
+const defaultRawLogPath = resolve(collectorDataDir, "raw-cases.jsonl");
 const delayMs = Number(process.env.CRAWL_DELAY_MS || 2500);
 const userAgent = process.env.CRAWLER_USER_AGENT || "AdmissionCaseResearchBot/0.1";
 const httpTimeoutMs = Math.max(1000, Number(process.env.COLLECTOR_HTTP_TIMEOUT_MS || 8000));
@@ -1738,7 +1740,7 @@ const hksgProgrammeAliases = {
 // them into the runtime matcher so the mapping work actually improves source
 // recall; lower-confidence rows stay out of strict matching.
 try {
-  const generated = JSON.parse(readFileSync(resolve(collectorRoot, "data", "programme-alias-map.json"), "utf8"));
+  const generated = JSON.parse(readFileSync(resolve(collectorConfigDir, "programme-alias-map.json"), "utf8"));
   for (const mapping of generated.mappings || []) {
     if (mapping.confidence !== "high" || !mapping.programmeId || !mapping.sourceName) continue;
     hksgProgrammeAliases[mapping.programmeId] = unique([
@@ -3074,12 +3076,14 @@ export function buildProgrammeCollectionPlan(programme, sources = [], db = null,
     searchSources: primaryCandidates.length ? [] : sources.map(source => ({ id: source.id, hosts: source.hosts, query: buildCaseSearchQuery(programme, source) }))
   };
 }
-export function buildLowCoverageProgrammePlans({ db, sources = [], targetApproved = DEFAULT_APPROVED_TARGET, limit = 20, institutionIds = targetInstitutionIds, programmeScope = "all", focusTags = [] } = {}) {
+export function buildLowCoverageProgrammePlans({ db, sources = [], targetApproved = DEFAULT_APPROVED_TARGET, limit = 20, institutionIds = targetInstitutionIds, programmeIds = [], programmeScope = "all", focusTags = [] } = {}) {
   const allowedInstitutions = new Set(institutionIds.filter(Boolean));
+  const allowedProgrammes = new Set(programmeIds.filter(Boolean));
   const allowedFocusTags = new Set(focusTags.filter(Boolean));
   const coreOnly = programmeScope === "core-engineering";
   return programmeMaster
     .filter(programme => programme.active !== false)
+    .filter(programme => !allowedProgrammes.size || allowedProgrammes.has(programme.id))
     .filter(programme => !allowedInstitutions.size || allowedInstitutions.has(programme.institutionId))
     .filter(programme => !allowedFocusTags.size || (programme.focusTags || []).some(tag => allowedFocusTags.has(tag)))
     .filter(programme => !coreOnly || isCoreEngineeringProgramme(programme))
@@ -3090,13 +3094,16 @@ export function buildLowCoverageProgrammePlans({ db, sources = [], targetApprove
       searchEvidence: programmeSearchEvidence(db, programme.id),
       recentNoProgress: eligibilityRecentNoProgressRunCount(db, programme.id)
     }))
-    .filter(plan => programmeCollectionEligibility({
-      scope: plan.programmeScope,
-      status: plan.programmeStatus,
-      coverage: plan.coverage,
-      searchEvidence: plan.searchEvidence,
-      targetApproved
-    }).eligible)
+    .filter(plan => {
+      const eligibility = programmeCollectionEligibility({
+        scope: plan.programmeScope,
+        status: plan.programmeStatus,
+        coverage: plan.coverage,
+        searchEvidence: plan.searchEvidence,
+        targetApproved
+      });
+      return eligibility.eligible || (allowedProgrammes.has(plan.programmeId) && eligibility.exclusion === "no-case-source");
+    })
     .filter(plan => !plan.coverage || (plan.coverage.approved2021 ?? plan.coverage.approved) < targetApproved)
     .sort((a, b) => Number((b.coverage?.pending2021 ?? b.coverage?.pending ?? 0) === 0)
         - Number((a.coverage?.pending2021 ?? a.coverage?.pending ?? 0) === 0)
@@ -4132,7 +4139,7 @@ async function classifyProgrammeScopeCommand(target, flags) {
       institutionIds: isInstitution ? [target] : target === "all" ? targetInstitutionIds : target ? [] : targetInstitutionIds,
       limit
     });
-    const outputPath = resolve(collectorRoot, "data", `programme-scope-audit-${Date.now()}.json`);
+    const outputPath = resolve(collectorDataDir, `programme-scope-audit-${Date.now()}.json`);
     await writeFile(outputPath, JSON.stringify({ generatedAt: new Date().toISOString(), ...result }, null, 2), "utf8");
     console.log(JSON.stringify({ outputPath, classified: result.classified, counts: result.counts }, null, 2));
   } finally {
@@ -4154,7 +4161,7 @@ async function verifyProgrammeStatusCommand(target, flags) {
     force: flags.includes("--refresh"),
     checkRobots: !flags.includes("--skip-robots")
   });
-  const outputPath = resolve(collectorRoot, "data", `programme-status-audit-${Date.now()}.json`);
+  const outputPath = resolve(collectorDataDir, `programme-status-audit-${Date.now()}.json`);
   await writeFile(outputPath, JSON.stringify({ generatedAt: new Date().toISOString(), ...result }, null, 2), "utf8");
   console.log(JSON.stringify({ outputPath, checked: result.checked, skipped: result.skipped, counts: result.counts }, null, 2));
 }

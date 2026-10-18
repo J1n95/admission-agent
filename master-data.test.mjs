@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { buildProgrammeSearchProfile, inferProgrammeFocus, institutionMaster, programmeMaster, resolveInstitution, resolveProgramme, undergraduateInstitutionEvidence } from "./master-data.mjs";
 
+const packagedResources = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")).build.extraResources;
+assert.ok(packagedResources.some(resource => resource.from === "collector/data/programme-catalogue.json"), "Desktop package must include the full programme catalogue");
+assert.ok(programmeMaster.filter(programme => programme.active !== false && ["cityu-hk", "cuhk", "hku", "hkust", "polyu-hk", "hkbu", "lingnan-hk", "eduhk", "ntu", "nus"].includes(programme.institutionId)).length > 100, "Collection must not silently fall back to the 25 curated projects");
 assert.ok(institutionMaster.length >= 30, "The initial institution registry must cover targets and collected cases");
 assert.equal(undergraduateInstitutionEvidence("美本").accepted, true, "Common overseas undergraduate shorthand must count as institution-tier evidence");
 assert.equal(resolveInstitution("山东大学青岛校区")?.id, "sdu-qingdao");

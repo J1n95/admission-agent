@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1120" role="img" aria-labelledby="title desc">
+  <title id="title">功能清单树状图</title>
+  <desc id="desc">从产品功能依次展开信息获取、AI分析、案例爬取模块，再展开子模块与具体功能。</desc>
+  <defs>
+    <style>
+      text { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; fill: #242424; }
+      .title { font-size: 32px; font-weight: 700; }
+      .module { font-size: 24px; font-weight: 600; }
+      .submodule { font-size: 21px; }
+      .feature { font-size: 20px; }
+      .branch { stroke: #7fa5c9; stroke-width: 2.2; fill: none; }
+    </style>
+  </defs>
+  <rect width="1700" height="1120" fill="white"/>
+  <text x="55" y="69" class="title">功能清单</text>
+
+  <rect x="45" y="506" width="210" height="76" rx="7" fill="#347bc3"/>
+  <text x="150" y="553" text-anchor="middle" style="font-size:24px;font-weight:600;fill:white">产品功能</text>
+  <path class="branch" d="M255 544 H282 M282 210 V875 M282 210 H310 M282 545 H310 M282 875 H310"/>
+
+  <rect x="310" y="174" width="235" height="72" rx="5" fill="#f2f3f4"/>
+  <text x="427" y="219" text-anchor="middle" class="module">信息获取模块</text>
+  <path class="branch" d="M545 210 H580 M580 125 V325 M580 125 H620 M580 225 H620 M580 325 H620"/>
+  <rect x="620" y="96" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <rect x="620" y="196" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <rect x="620" y="296" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <text x="745" y="133" text-anchor="middle" class="submodule">学术背景</text>
+  <text x="745" y="233" text-anchor="middle" class="submodule">个人经历</text>
+  <text x="745" y="333" text-anchor="middle" class="submodule">申请意向</text>
+  <path class="branch" d="M870 125 H918 M918 105 V145 M918 105 H947 M918 145 H947"/>
+  <path class="branch" d="M870 225 H918 M918 205 V245 M918 205 H947 M918 245 H947"/>
+  <path class="branch" d="M870 325 H918 M918 305 V345 M918 305 H947 M918 345 H947"/>
+  <text x="963" y="112" class="feature">录入院校、专业、GPA 和语言总分</text>
+  <text x="963" y="152" class="feature">核对成绩分制与必填资料</text>
+  <text x="963" y="212" class="feature">确认已修课程</text>
+  <text x="963" y="252" class="feature">补充实习、科研与奖项</text>
+  <text x="963" y="312" class="feature">选择申请地区、学校和方向</text>
+  <text x="963" y="352" class="feature">确定想了解的项目范围</text>
+
+  <rect x="310" y="509" width="235" height="72" rx="5" fill="#f2f3f4"/>
+  <text x="427" y="554" text-anchor="middle" class="module">AI分析模块</text>
+  <path class="branch" d="M545 545 H580 M580 445 V645 M580 445 H620 M580 545 H620 M580 645 H620"/>
+  <rect x="620" y="416" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <rect x="620" y="516" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <rect x="620" y="616" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <text x="745" y="453" text-anchor="middle" class="submodule">候选项目筛选</text>
+  <text x="745" y="553" text-anchor="middle" class="submodule">逐项目分析</text>
+  <text x="745" y="653" text-anchor="middle" class="submodule">结果校验与比较</text>
+  <path class="branch" d="M870 445 H918 M918 425 V465 M918 425 H947 M918 465 H947"/>
+  <path class="branch" d="M870 545 H918 M918 525 V565 M918 525 H947 M918 565 H947"/>
+  <path class="branch" d="M870 645 H918 M918 625 V665 M918 625 H947 M918 665 H947"/>
+  <text x="963" y="432" class="feature">按申请意向召回候选项目</text>
+  <text x="963" y="472" class="feature">复核不确定的候选项目</text>
+  <text x="963" y="532" class="feature">读取本地项目资料和已审案例，对照申请人背景</text>
+  <text x="963" y="572" class="feature">生成参考值、范围、理由与风险</text>
+  <text x="963" y="632" class="feature">校验证据并说明无数值原因</text>
+  <text x="963" y="672" class="feature">按参考值排序、展开详情并导出</text>
+
+  <rect x="310" y="839" width="235" height="72" rx="5" fill="#f2f3f4"/>
+  <text x="427" y="884" text-anchor="middle" class="module">案例爬取模块</text>
+  <path class="branch" d="M545 875 H580 M580 765 V985 M580 765 H620 M580 875 H620 M580 985 H620"/>
+  <rect x="620" y="736" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <rect x="620" y="846" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <rect x="620" y="956" width="250" height="58" rx="4" fill="#fafafa" stroke="#d6d6d6"/>
+  <text x="745" y="773" text-anchor="middle" class="submodule">项目资料采集</text>
+  <text x="745" y="883" text-anchor="middle" class="submodule">公开案例采集</text>
+  <text x="745" y="993" text-anchor="middle" class="submodule">案例审核入库</text>
+  <path class="branch" d="M870 765 H918 M918 745 V785 M918 745 H947 M918 785 H947"/>
+  <path class="branch" d="M870 875 H918 M918 855 V895 M918 855 H947 M918 895 H947"/>
+  <path class="branch" d="M870 985 H918 M918 965 V1005 M918 965 H947 M918 1005 H947"/>
+  <text x="963" y="752" class="feature">获取学校官网的项目页面</text>
+  <text x="963" y="792" class="feature">整理申请要求、课程与培养方向</text>
+  <text x="963" y="862" class="feature">指定具体项目和采集范围</text>
+  <text x="963" y="902" class="feature">搜索公开页面并提取案例背景</text>
+  <text x="963" y="972" class="feature">案例去重、项目匹配与复核</text>
+  <text x="963" y="1012" class="feature">人工审核，通过后供分析使用</text>
+</svg>

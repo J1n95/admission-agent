@@ -8,6 +8,7 @@ import { caseCoverage, openCaseStore } from "./store.mjs";
 import { DEFAULT_APPROVED_TARGET, TARGET_INSTITUTION_IDS } from "./programme-eligibility.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
+const collectorDataDir = resolve(process.env.ADMISSION_DATA_DIR || resolve(root, "data"));
 const agentPath = resolve(root, "agent.mjs");
 const mastermateImportPath = resolve(root, "import-mastermate-index.mjs");
 const argValue = (name, fallback) => {
@@ -45,6 +46,8 @@ const institutionIds = String(argValue("institutions", ""))
 const effectiveInstitutionIds = institutionIds.length ? institutionIds : TARGET_INSTITUTION_IDS;
 const focusTags = String(argValue("focus-tags", ""))
   .split(",").map(value => value.trim()).filter(Boolean);
+const programmeIds = String(argValue("programmes", ""))
+  .split(",").map(value => value.trim()).filter(Boolean);
 // Expansion is a harvesting job, not the human review gate. Keep collecting
 // while a few candidates are pending; callers can opt back into the old
 // blocking behavior for a review-only run.
@@ -55,8 +58,8 @@ const skipIndex = process.argv.includes("--skip-index") ? "--skip-index" : null;
 const skipSearch = process.argv.includes("--skip-search") ? "--skip-search" : null;
 const recheckEmpty = process.argv.includes("--recheck-empty");
 const stopAfterApproved = process.argv.includes("--stop-after-approved");
-const lockPath = resolve(root, "data", "expansion-agent.lock");
-const mastermateCursorPath = resolve(root, "data", "mastermate-agent-cursor.json");
+const lockPath = resolve(collectorDataDir, "expansion-agent.lock");
+const mastermateCursorPath = resolve(collectorDataDir, "mastermate-agent-cursor.json");
 const lockToken = randomUUID();
 
 function terminateChild(child) {
@@ -69,6 +72,7 @@ function terminateChild(child) {
 }
 
 async function acquireLock() {
+  await mkdir(collectorDataDir, { recursive: true });
   try {
     await writeFile(lockPath, JSON.stringify({ pid: process.pid, token: lockToken, startedAt: new Date().toISOString() }), { encoding: "utf8", flag: "wx" });
     return;
@@ -111,8 +115,9 @@ function runChild(programmeId) {
       ...(genericSources ? ["--allow-generic-sources"] : []),
       ...(skipIndex ? [skipIndex] : []),
       ...(skipSearch ? [skipSearch] : []),
+      ...(programmeIds.includes(programmeId) ? ["--force-eligibility"] : []),
       ...(recheckEmpty ? ["--recheck-empty"] : [])
-    ], { cwd: resolve(root, ".."), env: process.env });
+    ], { cwd: process.cwd(), env: process.env, windowsHide: true });
     let stdout = "";
     let stderr = "";
     let settled = false;
@@ -159,7 +164,7 @@ function runMastermateImport(pages = mastermatePages, startPage = 1) {
       `--institutions=${effectiveInstitutionIds.join(",")}`,
       ...(focusTags.length ? [`--focus-tags=${focusTags.join(",")}`] : [])
     ], {
-      cwd: resolve(root, ".."),
+      cwd: process.cwd(),
       env: process.env
     });
     let stdout = "";
@@ -281,7 +286,7 @@ try {
       // here, then filter already-tried programmes before selecting the next
       // concurrent batch.
       const plannerLimit = Math.max(2000, attempted.size + concurrency * 4);
-      const candidates = buildLowCoverageProgrammePlans({ db, sources, targetApproved, limit: plannerLimit, institutionIds: effectiveInstitutionIds, programmeScope, focusTags })
+      const candidates = buildLowCoverageProgrammePlans({ db, sources, targetApproved, limit: plannerLimit, institutionIds: effectiveInstitutionIds, programmeIds, programmeScope, focusTags })
         .filter(candidate => !attempted.has(candidate.programmeId));
       // A project whose only recent records are already pending cannot produce
       // approved coverage until a human resolves that queue. Keep the carpet
@@ -307,9 +312,9 @@ try {
   }
 
   const finishedAt = new Date().toISOString();
-  const outputPath = resolve(root, "data", `expansion-agent-${startedAt.slice(0, 10)}-${Date.now()}.json`);
+  const outputPath = resolve(collectorDataDir, `expansion-agent-${startedAt.slice(0, 10)}-${Date.now()}.json`);
   await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, JSON.stringify({ startedAt, finishedAt, targetApproved, programmeScope, limit, concurrency, maxPages, maxDetailPages, maxApiCalls, maxErrors, searchSources, searchRequests, childTimeoutMs, mastermatePages, mastermateHistoryPages, importMastermate, skipMastermate, strictSearchOnly, genericSources, skipIndex: Boolean(skipIndex), skipSearch: Boolean(skipSearch), recheckEmpty, stopAfterApproved, batchStopReason, institutionIds, focusTags, sourceImport, results }, null, 2), "utf8");
+  await writeFile(outputPath, JSON.stringify({ startedAt, finishedAt, targetApproved, programmeScope, limit, concurrency, maxPages, maxDetailPages, maxApiCalls, maxErrors, searchSources, searchRequests, childTimeoutMs, mastermatePages, mastermateHistoryPages, importMastermate, skipMastermate, strictSearchOnly, genericSources, skipIndex: Boolean(skipIndex), skipSearch: Boolean(skipSearch), recheckEmpty, stopAfterApproved, batchStopReason, institutionIds, programmeIds, focusTags, sourceImport, results }, null, 2), "utf8");
   console.log(JSON.stringify({ outputPath, sourceImport: sourceImport.report || sourceImport, projectsAttempted: results.length, progressedProjects: results.filter(result => result.progressed).length, approvedProgressedProjects: results.filter(result => result.approvedProgressed).length, timedOutProjects: results.filter(result => result.timedOut).length, batchStopReason, results: results.map(result => ({ programmeId: result.programmeId, before: result.before, after: result.after, delta: result.delta, progressed: result.progressed, approvedProgressed: result.approvedProgressed, quality: result.quality, timedOut: result.timedOut, stopReason: result.stopReason, pagesAttempted: result.pagesAttempted, errors: result.errors })) }, null, 2));
 } finally {
   await releaseLock();

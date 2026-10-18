@@ -11,16 +11,16 @@ export function selectAssessmentEvidence(entry, result) {
   const nearestFingerprint = result?.nearest?.fingerprint || "";
   const cases = documents.filter(document => document.provenance === "public-case")
     .sort((a, b) => {
+      const aPriority = a.metadata?.fingerprint === nearestFingerprint ? 0 : 1;
+      const bPriority = b.metadata?.fingerprint === nearestFingerprint ? 0 : 1;
       const aWeight = Number.isFinite(Number(a.metadata?.yearWeight)) ? Number(a.metadata.yearWeight) : 0;
       const bWeight = Number.isFinite(Number(b.metadata?.yearWeight)) ? Number(b.metadata.yearWeight) : 0;
       const aHybrid = hybridEvidenceScore(a.metadata?.vectorScore, aWeight);
       const bHybrid = hybridEvidenceScore(b.metadata?.vectorScore, bWeight);
-      const aPriority = a.metadata?.fingerprint === nearestFingerprint ? 0 : 1;
-      const bPriority = b.metadata?.fingerprint === nearestFingerprint ? 0 : 1;
       const aYear = Number(a.metadata?.offerYear) || 0;
       const bYear = Number(b.metadata?.offerYear) || 0;
       const vectorPresence = Number(bHybrid != null) - Number(aHybrid != null);
-      return vectorPresence || (bHybrid ?? 0) - (aHybrid ?? 0) || bWeight - aWeight || aPriority - bPriority || bYear - aYear || String(a.id).localeCompare(String(b.id));
+      return aPriority - bPriority || vectorPresence || (bHybrid ?? 0) - (aHybrid ?? 0) || bWeight - aWeight || bYear - aYear || String(a.id).localeCompare(String(b.id));
     });
   return [...official, ...cases];
 }

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">页面结构图</title>
+  <desc id="desc">API配置后进入信息填写主页；主页可进入案例采集与审核，提交申请信息后经历分析中并进入结果界面。结果界面内可查看项目详情、个人背景对比及具体案例。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L9 5 L0 10 Z" fill="#a5a5a5"/>
+    </marker>
+    <style>
+      text { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; fill: #242424; }
+      .title { font-size: 32px; font-weight: 700; }
+      .page { font-size: 26px; font-weight: 600; }
+      .body { font-size: 20px; }
+      .small { font-size: 18px; fill: #626262; }
+      .label { font-size: 18px; fill: #777; }
+      .box { fill: white; stroke: #555; stroke-width: 2; }
+      .divider { stroke: #dedede; stroke-width: 1.5; }
+      .nav { stroke: #aaa; stroke-width: 2.2; stroke-dasharray: 7 7; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1500" height="900" fill="white"/>
+  <text x="65" y="65" class="title">页面结构</text>
+
+  <rect x="70" y="155" width="280" height="160" class="box"/>
+  <text x="95" y="200" class="page">API 配置</text>
+  <text x="95" y="246" class="body">接口 / 模型 / Key</text>
+  <text x="95" y="282" class="body">测试连接、保存</text>
+  <path class="nav" d="M350 235 H470"/>
+  <text x="375" y="213" class="label">进入主页</text>
+
+  <rect x="480" y="130" width="390" height="245" class="box"/>
+  <text x="505" y="177" class="page">主页 · 填写信息</text>
+  <path d="M505 196 H845" class="divider"/>
+  <text x="505" y="237" class="body">院校 / 专业 / GPA / 语言</text>
+  <text x="505" y="273" class="body">课程 / 实习 / 科研等经历</text>
+  <text x="505" y="309" class="body">申请地区、学校和方向</text>
+  <text x="505" y="350" class="small">顶部有“案例采集与审核”入口</text>
+
+  <path class="nav" d="M870 233 H1040"/>
+  <text x="891" y="211" class="label">点击顶部入口</text>
+  <rect x="1050" y="130" width="380" height="245" class="box"/>
+  <text x="1075" y="177" class="page">案例采集与审核</text>
+  <path d="M1075 196 H1405" class="divider"/>
+  <text x="1075" y="237" class="body">指定项目与采集范围</text>
+  <text x="1075" y="273" class="body">启动采集、查看进度</text>
+  <text x="1075" y="309" class="body">审核候选案例</text>
+
+  <path class="nav" d="M675 375 V485"/>
+  <text x="697" y="442" class="label">提交信息</text>
+  <rect x="480" y="500" width="390" height="160" class="box"/>
+  <text x="505" y="548" class="page">分析中</text>
+  <path d="M505 567 H845" class="divider"/>
+  <text x="505" y="605" class="body">检索项目与案例</text>
+  <text x="505" y="639" class="body">生成项目分析</text>
+
+  <path class="nav" d="M870 580 H1040"/>
+  <text x="900" y="558" class="label">分析完成</text>
+  <rect x="1050" y="460" width="380" height="395" class="box"/>
+  <text x="1075" y="504" class="page">结果界面</text>
+  <text x="1075" y="538" class="small">项目按参考值排序，点击展开</text>
+  <path d="M1075 557 H1405" class="divider"/>
+  <text x="1075" y="591" class="body">项目详情</text>
+  <text x="1075" y="620" class="small">要求、课程方向、资源与区别</text>
+  <path d="M1075 639 H1405" class="divider"/>
+  <text x="1075" y="673" class="body">个人 BG 与案例对比</text>
+  <text x="1075" y="702" class="small">GPA、语言成绩及案例分布</text>
+  <path d="M1075 721 H1405" class="divider"/>
+  <text x="1075" y="755" class="body">具体案例列举</text>
+  <text x="1075" y="784" class="small">相近案例、公开背景与经历摘要</text>
+  <text x="1075" y="829" class="small">下载摘要 / 可选反馈</text>
+</svg>

@@ -24,8 +24,15 @@ export function normalizeAssessment(value, allowedDocumentIds = new Set(), compa
   const uncertainties = Array.isArray(value?.uncertainties) ? value.uncertainties.map(String) : [];
   if (!evidenceUsed.length || evidenceUsed.some(item => item.missing) && !uncertainties.length) return null;
 
-  const reasoning = Array.isArray(value?.reasoning) ? value.reasoning.map(String)
-    .filter(reason => evidenceUsed.some(item => reason.includes(`[${item.documentId}]`))) : [];
+  const reasoning = Array.isArray(value?.reasoning) ? value.reasoning.map(String).map(reason => {
+    const evidence = evidenceUsed.find(item => reason.includes(`[${item.documentId}]`)
+      || reason.startsWith(`[${item.documentId}:`) && reason.includes("]")
+      || reason.startsWith(`${item.documentId} `));
+    if (!evidence) return null;
+    if (reason.includes(`[${evidence.documentId}]`)) return reason;
+    const explanation = reason.startsWith("[") ? reason.slice(reason.indexOf("]") + 1) : reason.slice(evidence.documentId.length);
+    return `[${evidence.documentId}] ${explanation.trimStart()}`;
+  }).filter(Boolean) : [];
   if (!reasoning.length) return null;
 
   return {

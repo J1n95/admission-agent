@@ -51,6 +51,9 @@ export function buildCaseEmbeddingText(item = {}) {
 }
 
 export function buildProfileEmbeddingText(profile = {}, narrative = "", query = {}) {
+  const internshipTypes = Array.isArray(profile.internships)
+    ? profile.internships.flatMap(item => Array.isArray(item?.companyTypes) ? item.companyTypes : [])
+    : [];
   return [
     `申请年份：${profile.applicationYear || "未披露"}`,
     `本科院校：${profile.university || "未披露"}`,
@@ -59,6 +62,8 @@ export function buildProfileEmbeddingText(profile = {}, narrative = "", query = 
     `语言：${profile.languageTest || "未披露"} ${profile.language ?? "未披露"}`,
     `申请地区：${compactList(query.regions) || "未披露"}`,
     `申请方向：${compactList(query.fields) || "未披露"}`,
+    `实习方向：${compactList(profile.internships?.map(item => item?.direction).filter(Boolean)) || "未披露"}`,
+    `实习单位类型：${compactList(internshipTypes) || "未披露"}`,
     `课程标签：${compactList(profile.courseTags) || "未披露"}`,
     String(narrative || "").trim()
   ].filter(Boolean).join("\n");

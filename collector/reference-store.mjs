@@ -5,7 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import { institutionMaster, normalizeMasterName } from "../master-data.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
-export const referenceDbPath = resolve(root, "data", "reference", "institutions.sqlite");
+export const referenceDbPath = resolve(process.env.ADMISSION_REFERENCE_DB_PATH || resolve(root, "data", "reference", "institutions.sqlite"));
 
 function escapeLike(value) {
   return String(value || "").replaceAll("%", "").replaceAll("_", "");

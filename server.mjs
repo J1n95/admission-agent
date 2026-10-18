@@ -12,14 +12,18 @@ import { triageRows } from "./collector/review-engine.mjs";
 import { isCorroboratedReview, normalizeReviewDecision, reviewInput } from "./collector/review-agent.mjs";
 import { DEFAULT_APPROVED_TARGET, programmeCollectionEligibility, programmeSearchEvidence } from "./collector/programme-eligibility.mjs";
 import { institutionMaster, programmeMaster, resolveInstitution } from "./master-data.mjs";
+import { majorMaster } from "./major-master.mjs";
 import { buildProfileEmbeddingText, requestEmbeddings, resolveEmbeddingSettings } from "./collector/vector-search.mjs";
 import { standardizeGpa } from "./case-analysis.mjs";
+import { extractLanguageAssessment, parseModelJson } from "./miniprogram/cloudfunctions/admissionApi/agent/runtime.mjs";
 
 try { process.loadEnvFile(".env"); } catch (error) { if (error.code !== "ENOENT") throw error; }
 const port = Number(process.env.PORT || 4173);
 const host = process.env.HOST || "127.0.0.1";
 const isProduction = process.env.NODE_ENV === "production";
-const root = process.cwd();
+const root = process.env.ADMISSION_APP_ROOT || process.cwd();
+const desktopToken = process.env.ADMISSION_DESKTOP_TOKEN || "";
+const isDesktop = Boolean(desktopToken);
 const aiUrl = process.env.AI_API_URL || process.env.COLLECTOR_AI_API_URL;
 const aiKey = process.env.AI_API_KEY || process.env.COLLECTOR_AI_API_KEY;
 const aiModel = process.env.AI_MODEL || process.env.COLLECTOR_AI_MODEL;
@@ -50,6 +54,37 @@ const hksgInstitutionIds = new Set(["cityu-hk", "cuhk", "hku", "hkust", "polyu-h
 const hksgSchoolNames = new Map(institutionMaster
   .filter(institution => hksgInstitutionIds.has(institution.id))
   .map(institution => [institution.id, institution.nameZh || institution.nameEn || institution.id]));
+
+function searchMajors(query, limit = 20) {
+  const needle = String(query || '').trim().toLocaleLowerCase();
+  if (!needle) return [];
+  return majorMaster
+    .filter(item => [item.code, item.name, item.categoryName, item.className, ...(item.aliases || [])]
+      .filter(Boolean)
+      .join(' ')
+      .toLocaleLowerCase()
+      .includes(needle))
+    .sort((left, right) => {
+      const score = item => {
+        const name = item.name.toLocaleLowerCase();
+        if (name === needle) return 0;
+        if (name.startsWith(needle)) return 1;
+        if (name.includes(needle)) return 2;
+        if ((item.aliases || []).some(alias => String(alias).toLocaleLowerCase().startsWith(needle))) return 3;
+        return 4;
+      };
+      return score(left) - score(right) || left.name.localeCompare(right.name, 'zh-CN');
+    })
+    .slice(0, Math.max(1, Math.min(50, Number(limit) || 20)))
+    .map(item => ({
+      code: item.code,
+      name: item.name,
+      categoryName: item.categoryName,
+      className: item.className,
+      field: item.field,
+      aliases: item.aliases || []
+    }));
+}
 const collectorDirectionLabels = new Map([
   ["ai", "人工智能"], ["automation", "自动化"], ["biomedical", "生物医学"], ["business", "商业/管理"],
   ["chemical", "化学工程"], ["civil", "土木工程"], ["cloud", "云计算"], ["communication", "通信"],
@@ -74,6 +109,16 @@ const collectorOptions = {
       nameEn: institution.nameEn || "",
       country: institution.countryRegion || ""
     })),
+  programmes: programmeMaster
+    .filter(programme => programme.active !== false && hksgInstitutionIds.has(programme.institutionId))
+    .map(programme => ({
+      id: programme.id,
+      name: programme.nameZh || programme.nameEn || programme.id,
+      nameEn: programme.nameEn || "",
+      institutionId: programme.institutionId,
+      school: hksgSchoolNames.get(programme.institutionId) || programme.institutionId,
+      schoolEn: institutionMaster.find(institution => institution.id === programme.institutionId)?.nameEn || ""
+    })),
   directions: [...new Set(programmeMaster
     .filter(programme => hksgInstitutionIds.has(programme.institutionId))
     .flatMap(programme => programme.focusTags || []))]
@@ -95,10 +140,11 @@ const mime = {
 };
 const publicAssets = new Set([
   "/", "/index.html", "/styles.css", "/favicon.svg", "/robots.txt",
-  "/app.mjs", "/data.mjs", "/case-analysis.mjs", "/major-master.mjs",
+  "/app.mjs", "/comparison.mjs", "/data.mjs", "/case-analysis.mjs", "/display-evidence.mjs", "/major-master.mjs",
   "/admin.html", "/admin.mjs"
 ]);
 const adminAssets = new Set(["/review.html", "/review.mjs", "/review.css", "/analytics.html", "/analytics.mjs", "/analytics.css"]);
+const desktopReviewAssets = new Set(["/review.html", "/review.mjs", "/review.css"]);
 
 function applySecurityHeaders(response) {
   response.setHeader("Content-Security-Policy", "default-src 'self'; base-uri 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'");
@@ -148,12 +194,14 @@ function isAdminAuthenticated(request) {
 }
 
 function requireAdmin(request, response) {
+  if (isDesktop) return true;
   if (isAdminAuthenticated(request)) return true;
   sendJson(response, 401, { message: "需要管理员登录", code: "admin-auth-required" });
   return false;
 }
 
 function requireAdminPage(request, response, pathname) {
+  if (isDesktop && desktopReviewAssets.has(pathname)) return true;
   if (isAdminAuthenticated(request)) return true;
   response.writeHead(302, { Location: `/admin.html?next=${encodeURIComponent(pathname)}` });
   response.end();
@@ -202,10 +250,14 @@ function selectedStrings(value) {
 
 function startCollector(input = {}) {
   if (collectorController?.running) throw new Error("案例采集 Agent 已经在运行");
-  const requestedCountries = selectedStrings(input.countries);
-  const requestedInstitutions = selectedStrings(input.institutions).filter(id => hksgInstitutionIds.has(id));
-  const requestedDirections = selectedStrings(input.focusTags || input.directions)
+  const requestedProgrammes = selectedStrings(input.programmeIds);
+  const validProgrammeIds = new Set(collectorOptions.programmes.map(programme => programme.id));
+  if (requestedProgrammes.some(id => !validProgrammeIds.has(id))) throw new Error("所选项目不在当前项目目录中，请刷新页面后重选");
+  const requestedCountries = requestedProgrammes.length ? [] : selectedStrings(input.countries);
+  const requestedInstitutions = requestedProgrammes.length ? [] : selectedStrings(input.institutions).filter(id => hksgInstitutionIds.has(id));
+  const requestedDirections = (requestedProgrammes.length ? [] : selectedStrings(input.focusTags || input.directions))
     .filter(id => collectorOptions.directions.some(direction => direction.id === id));
+  if (requestedProgrammes.length && input.importMastermate === true) throw new Error("指定具体项目时不能同时导入全站索引");
   const countryInstitutions = new Set(collectorOptions.schools
     .filter(school => !requestedCountries.length || requestedCountries.includes(school.country))
     .map(school => school.id));
@@ -216,7 +268,7 @@ function startCollector(input = {}) {
   }
   const args = [
     join(root, "collector", "expansion-agent.mjs"),
-    `--limit=${boundedNumber(input.limit, 2000, 1, 2000)}`,
+    `--limit=${requestedProgrammes.length || boundedNumber(input.limit, 2000, 1, 2000)}`,
     `--concurrency=${boundedNumber(input.concurrency, 3, 1, 6)}`,
     `--target-approved=${boundedNumber(input.targetApproved, DEFAULT_APPROVED_TARGET, 1, 50)}`,
     `--max-pages=${boundedNumber(input.maxPages, 8, 1, 30)}`,
@@ -227,14 +279,20 @@ function startCollector(input = {}) {
     `--search-requests=${boundedNumber(input.searchRequests, 36, 1, 100)}`
   ];
   if (institutionIds.length && (requestedCountries.length || requestedInstitutions.length)) {
-    args.push(`--institutions=${institutionIds.join(",")}`);
+    if (!requestedProgrammes.length) args.push(`--institutions=${institutionIds.join(",")}`);
   }
-  if (requestedDirections.length) args.push(`--focus-tags=${requestedDirections.join(",")}`);
+  if (requestedProgrammes.length) args.push(`--programmes=${requestedProgrammes.join(",")}`);
+  else if (requestedDirections.length) args.push(`--focus-tags=${requestedDirections.join(",")}`);
   if (input.importMastermate === true) args.push("--import-mastermate");
   if (input.recheckEmpty === true) args.push("--recheck-empty");
   if (input.stopAfterApproved === true) args.push("--stop-after-approved");
   if (input.stopOnPending !== true) args.push("--allow-pending");
-  const child = spawn(process.execPath, args, { cwd: root, env: process.env, stdio: ["ignore", "pipe", "pipe"] });
+  const child = spawn(process.execPath, args, {
+    cwd: isDesktop ? process.cwd() : root,
+    env: isDesktop ? { ...process.env, ELECTRON_RUN_AS_NODE: "1" } : process.env,
+    windowsHide: true,
+    stdio: ["ignore", "pipe", "pipe"]
+  });
   collectorController = {
     child,
     running: true,
@@ -244,7 +302,8 @@ function startCollector(input = {}) {
     scope: {
       countries: requestedCountries,
       institutions: institutionIds,
-      focusTags: requestedDirections
+      focusTags: requestedDirections,
+      programmeIds: requestedProgrammes
     },
     output: []
   };
@@ -272,6 +331,7 @@ function stopCollector() {
   collectorOutput("[process-stop] 已发送停止请求");
   return collectorStatus();
 }
+export const stopLocalCollector = stopCollector;
 
 let activeAssessmentCalls = 0;
 const assessmentWaiters = [];
@@ -485,7 +545,7 @@ async function generateReviewDecision(row, sourceText) {
   });
   const payload = await upstream.json();
   if (!upstream.ok) throw new Error(payload?.error?.message || "审核模型调用失败");
-  return normalizeReviewDecision(parseModelJson(payload?.choices?.[0]?.message?.content));
+  return normalizeReviewDecision(parseModelJson(payload?.choices?.[0]?.message?.content, payload?.choices?.[0]?.finish_reason));
 }
 
 async function llmTriage(request, response) {
@@ -528,11 +588,6 @@ async function llmTriage(request, response) {
   }
 }
 
-function parseModelJson(content) {
-  const cleaned = String(content).replace(/^```json\s*/i, "").replace(/\s*```$/, "");
-  return JSON.parse(cleaned);
-}
-
 function validateProgrammeScreeningResult(value, input) {
   const projects = Array.isArray(input?.projects) ? input.projects : [];
   const selected = Array.isArray(value?.selectedProgrammeIds) ? value.selectedProgrammeIds.map(String) : [];
@@ -555,6 +610,7 @@ async function generateProgrammeScreeningOnce(input, retries = screeningRetries)
   const requestBody = {
     model: aiModel,
     temperature: Number.isFinite(Number(process.env.AI_TEMPERATURE)) ? Number(process.env.AI_TEMPERATURE) : 0,
+    max_tokens: Math.min(4000, Math.max(2000, Number(process.env.AI_MAX_TOKENS || 4000))),
     messages: [
       { role: "system", content: screeningPrompt },
       { role: "user", content: JSON.stringify(input) }
@@ -574,7 +630,7 @@ async function generateProgrammeScreeningOnce(input, retries = screeningRetries)
       });
       const payload = await upstream.json();
       if (!upstream.ok) throw new Error(payload?.error?.message || "项目筛选模型调用失败");
-      const parsed = validateProgrammeScreeningResult(parseModelJson(payload?.choices?.[0]?.message?.content), input);
+      const parsed = validateProgrammeScreeningResult(parseModelJson(payload?.choices?.[0]?.message?.content, payload?.choices?.[0]?.finish_reason), input);
       return { ...parsed, configured: true, attempts: attempt };
     } catch (error) {
       lastError = error;
@@ -633,27 +689,6 @@ function fallbackProgrammeScreening(entries, maximum = 8) {
   };
 }
 
-function extractLanguageAssessment(programme, profile = {}) {
-  const text = String(programme?.officialNote || "");
-  const officialTests = {
-    IELTS: text.match(/IELTS(?:\s+Academic)?[^0-9]{0,30}(\d(?:\.\d)?)/i)?.[1] ?? (programme?.languageMin ?? null),
-    TOEFL: text.match(/TOEFL(?:\s+iBT)?[^0-9]{0,30}(\d{2,3})/i)?.[1] ?? null
-  };
-  const test = String(profile.languageTest || "").toUpperCase().startsWith("TOEFL") ? "TOEFL" : "IELTS";
-  const score = Number(profile.language);
-  const required = officialTests[test] == null ? null : Number(officialTests[test]);
-  return {
-    applicantTest: test,
-    applicantScore: Number.isFinite(score) ? score : null,
-    officialTests,
-    comparable: Number.isFinite(required),
-    meets: Number.isFinite(required) && Number.isFinite(score) ? score >= required : null,
-    instruction: Number.isFinite(required)
-      ? `只可比较同为${test}的成绩；申请人${test} ${Number.isFinite(score) ? score : "未披露"}，官方最低${required}。`
-      : `官方资料没有提供可核验的${test}最低分，不能声称申请人的语言成绩满足要求。`
-  };
-}
-
 async function generateAssessments(input) {
   if (!aiUrl || !aiKey || !aiModel) {
     return { assessments: {}, configured: false };
@@ -679,23 +714,33 @@ async function generateAssessments(input) {
     });
   const payload = await upstream.json();
   if (!upstream.ok) throw new Error(payload?.error?.message || "上游模型调用失败");
-    return { ...parseModelJson(payload?.choices?.[0]?.message?.content), configured: true };
+    return { ...parseModelJson(payload?.choices?.[0]?.message?.content, payload?.choices?.[0]?.finish_reason), configured: true };
   });
 }
 
 async function generateAssessmentsInParallel(input) {
+  const comparisonProgrammes = input.programmes.map(programme => ({
+    id: programme.id,
+    name: programme.name,
+    nameEn: programme.nameEn,
+    officialRequirements: programme.officialRequirements,
+    languageAssessment: programme.languageAssessment,
+    positioning: programme.positioning,
+    caseDistribution: programme.caseDistribution
+  }));
   const settled = await Promise.allSettled(input.programmes.map(programme =>
-    generateAssessments({ ...input, programmes: [programme] })
+    generateAssessments({ ...input, programmes: [programme], comparisonProgrammes })
   ));
   const assessments = {};
   const errors = [];
   for (const [index, result] of settled.entries()) {
     const programmeId = input.programmes[index].id;
-    if (result.status === "fulfilled") {
-      Object.assign(assessments, result.value.assessments || {});
-      if (!result.value.assessments?.[programmeId]) errors.push(`${programmeId}:模型未返回合法分析结果`);
+    if (result.status === "fulfilled" && result.value.assessments?.[programmeId]) {
+      assessments[programmeId] = result.value.assessments[programmeId];
     } else {
-      errors.push(`${programmeId}:${result.reason?.message || "项目分析模型调用失败"}`);
+      errors.push(`${programmeId}:${result.status === "rejected"
+        ? result.reason?.message || "项目分析模型调用失败"
+        : "模型未返回合法分析结果"}`);
     }
   }
   return { assessments, configured: true, errors };
@@ -806,6 +851,13 @@ async function analyze(request, response) {
         consentVersion: "2026-08-16"
       }
     });
+    if (process.env.ADMISSION_AGENT_MODE === "legacy-two-stage") {
+      const { analyzeWithLegacyAgent } = await import("./desktop/legacy-analysis.mjs");
+      const body = await analyzeWithLegacyAgent(input);
+      completeAnalysisRecord(reviewDb, analysisId, { status: "completed", result: body });
+      sendJson(response, 200, { ...body, analysisId });
+      return;
+    }
     const profileText = String(input.profileText || "");
     const impliedFields = /集成电路|微电子|IC设计|integrated[- ]circuit|microelectronics|semiconductor/i.test(profileText)
       ? ["integrated-circuit"]
@@ -995,7 +1047,8 @@ async function analyze(request, response) {
         officialCode: programme.officialCode,
         officialUrl: programme.officialUrl,
         officialRequirements: programme.officialNote,
-        languageAssessment: extractLanguageAssessment(programme, input.profile?.structured || input.profile || {}),
+        languageAssessment: extractLanguageAssessment(programme, input.profile?.structured || input.profile || {},
+          assessmentEvidenceByProgramme[programme.id].allDocuments),
         positioning: programme.overview,
         curriculum: programme.courseOrientation,
         retrievedEvidence: assessmentEvidenceByProgramme[programme.id].evidenceSelection,
@@ -1006,7 +1059,7 @@ async function analyze(request, response) {
     let generated = { assessments: {}, configured: Boolean(aiUrl && aiKey && aiModel), skipped: !modelInput.programmes.length };
     let modelError = "";
     const assessmentExecution = {
-      strategy: "parallel-per-programme",
+      strategy: "parallel-per-programme-with-shared-comparison",
       repeats: 1,
       maxConcurrency: assessmentMaxConcurrency,
       thinking: assessmentThinking,
@@ -1122,7 +1175,7 @@ async function submitFeedback(request, response) {
   const clarity = String(input.clarity || "");
   if (!/^[a-f0-9]{32}$/.test(analysisId)
     || !["very", "some", "none"].includes(usefulness)
-    || !["probability", "cases", "programme", "gaps"].includes(valuable)
+    || !["boundaries", "probability", "cases", "programme", "gaps"].includes(valuable)
     || !["clear", "average", "unclear"].includes(clarity)) {
     sendJson(response, 400, { message: "问卷内容不完整或分析记录无效" });
     return;
@@ -1138,10 +1191,38 @@ async function submitFeedback(request, response) {
     : { message: "找不到对应的分析记录" });
 }
 
-createServer(async (request, response) => {
+export function clearLocalAnalysisData() {
+  if (!desktopToken) throw new Error("仅桌面程序允许删除本机申请记录。");
+  reviewDb.exec("PRAGMA secure_delete = ON");
+  reviewDb.exec("BEGIN IMMEDIATE");
+  try {
+    reviewDb.exec("DELETE FROM analysis_feedback; DELETE FROM analysis_records;");
+    reviewDb.exec("COMMIT");
+  } catch (error) {
+    reviewDb.exec("ROLLBACK");
+    throw error;
+  }
+}
+
+export function closeLocalDataStore() {
+  reviewDb.close();
+}
+
+export const httpServer = createServer(async (request, response) => {
   applySecurityHeaders(response);
+  if (desktopToken && request.headers["x-admission-desktop-token"] !== desktopToken) {
+    response.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Desktop access only");
+    return;
+  }
   const requestUrl = new URL(request.url, `http://${request.headers.host}`);
   const pathname = decodeURIComponent(requestUrl.pathname);
+  if (desktopToken && (pathname.startsWith("/api/admin/") || pathname === "/admin.html" || pathname === "/admin.mjs"
+    || (adminAssets.has(pathname) && !desktopReviewAssets.has(pathname)))) {
+    response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Not found");
+    return;
+  }
   if (request.method === "GET" && pathname === "/api/health") {
     sendJson(response, 200, { status: "ok", uptimeSeconds: Math.floor(process.uptime()) });
     return;
@@ -1181,7 +1262,7 @@ createServer(async (request, response) => {
     return;
   }
   if (request.method === "GET" && pathname === "/api/collector/status") {
-    sendJson(response, 200, collectorStatus());
+    sendJson(response, 200, { ...collectorStatus(), desktop: isDesktop });
     return;
   }
   if (request.method === "GET" && pathname === "/api/collector/options") {
@@ -1251,6 +1332,11 @@ createServer(async (request, response) => {
     sendJson(response, 200, { query, results: searchInstitutions(query, 8) });
     return;
   }
+  if (request.method === "GET" && pathname === "/api/majors/search") {
+    const query = requestUrl.searchParams.get("q") || "";
+    sendJson(response, 200, { query, results: searchMajors(query, 20) });
+    return;
+  }
   if (!["GET", "HEAD"].includes(request.method) || (!publicAssets.has(pathname) && !adminAssets.has(pathname))) {
     response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
     response.end("Not found");
@@ -1270,6 +1356,8 @@ createServer(async (request, response) => {
   });
   if (request.method === "HEAD") response.end();
   else createReadStream(file).pipe(response);
-}).listen(port, host, () => {
+});
+
+httpServer.listen(port, host, () => {
   console.log(`录取参照 running at http://${host}:${port}`);
 });

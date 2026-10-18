@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>模型 API 设置 · 录取参照</title>
+  <style>
+    :root { color-scheme: light; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: #20211f; background: #f4f2ed; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 30px; }
+    main { max-width: 760px; margin: 0 auto; }
+    h1 { margin: 0 0 8px; font-size: 25px; }
+    .intro { margin: 0 0 24px; color: #6c6b64; line-height: 1.7; font-size: 14px; }
+    label { display: block; margin: 17px 0 7px; font-size: 14px; font-weight: 600; }
+    input { width: 100%; padding: 11px 12px; border: 1px solid #d7d5cd; border-radius: 8px; background: #fff; color: #20211f; font: inherit; outline: none; }
+    input:focus { border-color: #405b51; box-shadow: 0 0 0 3px #405b5118; }
+    .hint { color: #77766f; font-size: 12px; line-height: 1.6; margin-top: 6px; }
+    .key-state { color: #35624f; font-size: 12px; margin-top: 6px; }
+    .section { margin-top: 28px; padding-top: 24px; border-top: 1px solid #d7d5cd; }
+    .section h2 { margin: 0 0 7px; font-size: 17px; }
+    .section p { color: #77766f; font-size: 12px; line-height: 1.6; margin: 0 0 16px; }
+    .experiment-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .profile { padding: 16px; border: 1px solid #d7d5cd; border-radius: 8px; background: #fbfaf7; }
+    .profile h3 { margin: 0 0 4px; font-size: 15px; }
+    .profile .profile-state { color: #77766f; font-size: 12px; margin-bottom: 10px; }
+    .profile label { margin-top: 12px; }
+    .profile input { padding: 9px 10px; font-size: 13px; }
+    .experiment-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .experiment-actions button { flex: 1; }
+    #testExperiment { background: #e7e5dd; color: #252621; }
+    #runExperiment { background: #263f35; color: white; }
+    #runExperiment:disabled { opacity: .55; }
+    .progress { margin-top: 12px; color: #77766f; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+    .notice { display: none; padding: 10px 12px; border-radius: 7px; margin-top: 18px; font-size: 13px; line-height: 1.6; }
+    .notice.show { display: block; }
+    .notice.error { color: #8c2f28; background: #f7e9e7; }
+    .notice.success { color: #28543f; background: #e7f0e9; }
+    .actions { display: flex; gap: 10px; margin-top: 24px; }
+    button { border: 0; border-radius: 8px; padding: 11px 16px; font: inherit; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    #test { background: #e7e5dd; color: #252621; }
+    #save { flex: 1; background: #263f35; color: white; }
+    .foot { margin-top: 20px; color: #77766f; font-size: 12px; line-height: 1.6; }
+    @media (max-width: 680px) { .experiment-grid { grid-template-columns: 1fr; } body { padding: 20px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>连接你的模型 API</h1>
+    <p class="intro">软件在本机运行分析。请填写兼容 OpenAI Chat Completions 的服务地址、API Key 和模型名。</p>
+    <form id="settings">
+      <div class="section" style="margin-top:0;padding-top:0;border-top:0">
+        <h2>软件当前使用的模型</h2>
+        <p>用于正常填写申请资料和生成分析报告。</p>
+      </div>
+      <label for="apiUrl">API 接口地址</label>
+      <input id="apiUrl" type="url" required placeholder="https://api.example.com/v1/chat/completions" autocomplete="url">
+      <div class="hint">填写完整接口路径，需以 https:// 开头。</div>
+
+      <label for="model">模型名称</label>
+      <input id="model" required placeholder="例如：deepseek-v4-flash" autocomplete="off">
+
+      <label for="apiKey">API Key</label>
+      <input id="apiKey" type="password" placeholder="粘贴服务商提供的 API Key" autocomplete="new-password">
+      <div id="keyState" class="key-state"></div>
+
+      <section class="section">
+        <h2>模型对比实验</h2>
+        <p>候选模型实验：使用千问 qwen3.7-plus 对 8 个固定场景进行测试，并与本机已保存的 Flash / DeepSeek 基线对照。费用预检硬上限 5 元；若估算超限，将在发送请求前停止。Key 加密保存在本机，费用以服务商账单为准。</p>
+        <div class="experiment-grid">
+          <div class="profile">
+            <h3>千问</h3>
+            <div id="qwenState" class="profile-state"></div>
+            <label for="qwenApiUrl">接口地址</label>
+            <input id="qwenApiUrl" type="url" required>
+            <label for="qwenModel">模型名称</label>
+            <input id="qwenModel" required readonly value="qwen3.7-plus">
+            <label for="qwenApiKey">API Key</label>
+            <input id="qwenApiKey" type="password" placeholder="粘贴后保存" autocomplete="new-password">
+          </div>
+          <div class="profile">
+            <h3>DeepSeek</h3>
+            <div id="deepseekState" class="profile-state"></div>
+            <label for="deepseekApiUrl">接口地址</label>
+            <input id="deepseekApiUrl" type="url" required>
+            <label for="deepseekModel">模型名称</label>
+            <input id="deepseekModel" required readonly>
+            <label for="deepseekApiKey">API Key</label>
+            <input id="deepseekApiKey" type="password" placeholder="粘贴后保存" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="experiment-actions">
+          <button id="testExperiment" type="button">测试两套接口</button>
+          <button id="runExperiment" type="button">保存并运行 8 场景实验</button>
+        </div>
+        <div id="experimentNotice" class="notice" role="status"></div>
+        <div id="experimentProgress" class="progress"></div>
+      </section>
+
+      <div id="notice" class="notice" role="status"></div>
+      <div class="actions">
+        <button id="test" type="button">测试连接</button>
+        <button id="save" type="submit">保存并启动</button>
+      </div>
+    </form>
+    <p class="foot">API Key 使用系统安全存储加密保存在本机，不会发送给本项目服务器。分析时，申请资料和检索证据会发送给你填写的模型服务商；请先确认其数据处理条款。模型费用由你的服务商账号承担。本机记录可在“录取参照 → 删除本机申请记录”中清除；这无法撤回已发送给模型服务商的数据。</p>
+  </main>
+  <script src="settings.js"></script>
+</body>
+</html>

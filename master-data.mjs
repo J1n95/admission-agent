@@ -1,5 +1,6 @@
 import { programmes as seededProgrammes, schools as seededSchools } from "./data.mjs";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 const normalizeName = value => String(value || "")
   .normalize("NFKC")
@@ -351,8 +352,15 @@ export const inferProgrammeFocus = name => {
   return [...new Set(tags)];
 };
 let discoveredProgrammes = [];
-try {
-  const catalogue = JSON.parse(readFileSync(new URL("./collector/data/programme-catalogue.json", import.meta.url), "utf8"));
+{
+  let catalogueText;
+  try {
+    catalogueText = readFileSync(new URL("./collector/data/programme-catalogue.json", import.meta.url), "utf8");
+  } catch (error) {
+    if (error.code !== "ENOENT" || !process.resourcesPath) throw error;
+    catalogueText = readFileSync(join(process.resourcesPath, "data", "collector", "programme-catalogue.json"), "utf8");
+  }
+  const catalogue = JSON.parse(catalogueText);
   discoveredProgrammes = (catalogue.programmes || []).flatMap(item => {
     // Streams are options inside the parent degree, not separate applications.
     if (/\)\s*-\s*.+ stream$/i.test(item.nameEn)) return [];
@@ -379,7 +387,7 @@ try {
       caseSourceUrls: []
     }];
   });
-} catch {}
+}
 
 const programmeAliasOverrides = {
   "ntu-master-of-science-signal-processing-machine-learning": ["信号处理与机器学习硕士", "信号处理与机器学习理学硕士", "Signal Processing and Machine Learning"],

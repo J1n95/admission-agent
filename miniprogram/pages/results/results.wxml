@@ -1,0 +1,100 @@
+<view class="page">
+  <text class="eyebrow">ADMISSION REFERENCE</text>
+  <view class="page-title">概率档案</view>
+  <view class="lead">结果是基于项目资料、公开案例和申请背景生成的参考判断，不是学校承诺或录取保证。</view>
+
+  <view class="result-summary" wx:if="{{summary}}">
+    <view class="summary-profile">{{summary.profile}}</view>
+    <view class="summary-note">{{summary.message}}</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">项目结果</view>
+    <view class="empty" wx:if="{{!results.length}}">暂时没有返回项目结果，请返回检查申请范围或重试。</view>
+    <view class="result-row" wx:for="{{results}}" wx:key="id">
+      <view class="result-meta">{{item.meta}}<text wx:if="{{item.schoolCode}}">（{{item.schoolCode}}）</text></view>
+      <view class="result-title">{{item.title}}</view>
+      <view class="muted">{{item.subtitle}}</view>
+      <view class="probability">
+        <text class="probability-number">{{item.probability}}</text>
+        <text class="muted">{{item.range}}</text>
+      </view>
+      <view class="muted">公开案例：{{item.caseCount}} 条 · {{item.assessmentStatus}}</view>
+      <view class="detail-toggle" data-index="{{index}}" bindtap="toggleResultDetail">
+        <text>{{item.expanded ? '收起详细分析' : '查看匹配、风险与材料建议'}}</text>
+        <text class="detail-toggle-mark">{{item.expanded ? '−' : '＋'}}</text>
+      </view>
+      <view class="result-detail" wx:if="{{item.expanded}}">
+        <view wx:if="{{item.fit.length}}">
+          <view class="detail-title">匹配点</view>
+          <view class="detail-list">
+            <view wx:for="{{item.fit}}" wx:key="*this">{{item}}</view>
+          </view>
+        </view>
+        <view wx:if="{{item.uncertainties.length}}">
+          <view class="detail-title">风险与信息边界</view>
+          <view class="detail-list">
+            <view wx:for="{{item.uncertainties}}" wx:key="*this">{{item}}</view>
+          </view>
+        </view>
+        <view wx:if="{{item.evidenceCases.length}}">
+          <view class="detail-title">本次采用的可比案例</view>
+          <view class="case-list">
+            <view class="case-row" wx:for="{{item.evidenceCases}}" wx:for-item="caseItem" wx:key="id">
+              <view class="case-heading"><text>{{caseItem.label}}</text><text>{{caseItem.year}} 录取</text></view>
+              <view>{{caseItem.background}}</view>
+              <view class="case-muted">{{caseItem.gpa}} · {{caseItem.language}}</view>
+              <view class="case-muted">{{caseItem.experience}}</view>
+              <view class="case-compare">与你相比：{{caseItem.comparison}}</view>
+            </view>
+          </view>
+        </view>
+        <view wx:if="{{item.psCv.length}}">
+          <view class="detail-title">CV / PS 怎么写</view>
+          <view class="detail-list">
+            <view wx:for="{{item.psCv}}" wx:key="*this">{{item}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">结果反馈</view>
+    <view class="hint">只需要几秒，帮助我们改进项目匹配和结果解释。</view>
+    <view class="field">
+      <text class="label">这份档案对你有多大帮助？</text>
+      <radio-group bindchange="onFeedbackChange" data-key="usefulness">
+        <label class="feedback-option"><radio value="very" checked="{{feedback.usefulness === 'very'}}" />很有帮助</label>
+        <label class="feedback-option"><radio value="some" checked="{{feedback.usefulness === 'some'}}" />有一些帮助</label>
+        <label class="feedback-option"><radio value="none" checked="{{feedback.usefulness === 'none'}}" />帮助不大</label>
+      </radio-group>
+    </view>
+    <view class="field">
+      <text class="label">最有价值的部分</text>
+      <radio-group bindchange="onFeedbackChange" data-key="valuable">
+        <label class="feedback-option"><radio value="probability" checked="{{feedback.valuable === 'probability'}}" />概率判断</label>
+        <label class="feedback-option"><radio value="cases" checked="{{feedback.valuable === 'cases'}}" />公开案例</label>
+        <label class="feedback-option"><radio value="programme" checked="{{feedback.valuable === 'programme'}}" />项目分析</label>
+        <label class="feedback-option"><radio value="gaps" checked="{{feedback.valuable === 'gaps'}}" />差距建议</label>
+      </radio-group>
+    </view>
+    <view class="field">
+      <text class="label">结果是否清楚？</text>
+      <radio-group bindchange="onFeedbackChange" data-key="clarity">
+        <label class="feedback-option"><radio value="clear" checked="{{feedback.clarity === 'clear'}}" />清楚</label>
+        <label class="feedback-option"><radio value="average" checked="{{feedback.clarity === 'average'}}" />一般</label>
+        <label class="feedback-option"><radio value="unclear" checked="{{feedback.clarity === 'unclear'}}" />不清楚</label>
+      </radio-group>
+    </view>
+    <view class="field">
+      <text class="label">补充意见（可选）</text>
+      <textarea value="{{feedback.comment}}" bindinput="onCommentInput" placeholder="哪里最有帮助，或哪里需要改进？" />
+    </view>
+    <view class="status feedback-success" wx:if="{{feedbackSaved}}">反馈已保存，谢谢。</view>
+    <view class="status" wx:if="{{error}}">{{error}}</view>
+    <button class="primary-button" loading="{{savingFeedback}}" disabled="{{savingFeedback || feedbackSaved}}" bindtap="submitFeedback">提交反馈</button>
+  </view>
+
+  <button class="secondary-button" bindtap="backToForm">修改申请信息</button>
+</view>

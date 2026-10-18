@@ -20,21 +20,31 @@
     <section class="collector-panel">
       <details open>
         <summary>独立案例采集 Agent</summary>
-        <p class="meta">启动后 Agent 会在后台跨来源搜索你选择范围内的新案例，写入待审核队列；它不依赖 Codex 窗口。国家/地区、学校和项目方向均可多选；全部留空表示港八新二全部项目。</p>
+        <p class="meta">启动后 Agent 会在后台跨来源搜索公开案例，可能消耗你配置的模型 API 额度。可直接指定项目；不指定时才按地区、学校和方向筛选。</p>
         <form id="collector-form" class="collector-form">
+          <fieldset class="collector-programmes"><legend>指定采集项目（优先）</legend>
+            <label for="collector-programme-search">搜索学校或项目名称</label>
+            <input id="collector-programme-search" type="search" autocomplete="off" placeholder="例如：香港科技大学 电子工程 / NUS Data Science">
+            <label for="collector-programme-results">匹配项目</label>
+            <select id="collector-programme-results" size="6" aria-describedby="collector-programme-hint"></select>
+            <p id="collector-programme-match-count" class="meta" aria-live="polite"></p>
+            <button id="collector-programme-add" type="button">添加所选项目</button>
+            <div id="collector-programme-selected" class="programme-selected" aria-live="polite">尚未指定项目</div>
+            <p id="collector-programme-hint" class="meta">可添加多个项目；指定后只尝试这些项目，其他范围筛选和“项目尝试上限”不生效。已达到案例目标的项目会跳过，需要继续采集可提高“每项目目标”。</p>
+          </fieldset>
           <fieldset class="collector-scope"><legend>采集范围</legend>
             <label>国家/地区<select id="collector-countries" name="countries" multiple size="2"></select></label>
             <label>学校<select id="collector-institutions" name="institutions" multiple size="6"></select></label>
             <label>项目方向<select id="collector-focus-tags" name="focusTags" multiple size="6"></select></label>
-            <p class="meta scope-hint">多选请按住 Ctrl；全部不选代表不限制该项。</p>
+            <p class="meta scope-hint">未指定具体项目时生效。多选请按住 Ctrl；全部不选代表不限制该项。</p>
           </fieldset>
-          <label>项目尝试上限<input name="limit" type="number" min="1" max="2000" value="2000"></label>
-          <label>并发项目数<input name="concurrency" type="number" min="1" max="6" value="3"></label>
+          <label>项目尝试上限<input name="limit" type="number" min="1" max="2000" value="3"></label>
+          <label>并发项目数<input name="concurrency" type="number" min="1" max="6" value="1"></label>
           <label>每项目目标<input name="targetApproved" type="number" min="1" max="50" value="10"></label>
-          <label>每项目页面上限<input name="maxPages" type="number" min="1" max="30" value="8"></label>
-          <label>搜索请求预算<input name="searchRequests" type="number" min="1" max="100" value="36"></label>
-          <label class="collector-check"><input name="importMastermate" type="checkbox">同时导入 Mastermate 索引</label>
-          <div class="collector-actions"><button id="collector-start" type="submit">启动自动采集</button><button id="collector-stop" type="button">停止采集</button><button id="collector-refresh" type="button">刷新状态</button></div>
+          <label>每项目页面上限<input name="maxPages" type="number" min="1" max="30" value="6"></label>
+          <label>搜索请求预算<input name="searchRequests" type="number" min="1" max="100" value="12"></label>
+          <label class="collector-check"><input id="collector-import-mastermate" name="importMastermate" type="checkbox">同时导入 Mastermate 索引</label>
+          <div class="collector-actions"><button id="collector-start" type="submit" disabled>启动自动采集</button><button id="collector-stop" type="button">停止采集</button><button id="collector-refresh" type="button">刷新状态</button></div>
         </form>
         <p id="collector-state" class="meta">正在读取 Agent 状态…</p>
         <pre id="collector-log" class="collector-log"></pre>

@@ -1,0 +1,12 @@
+{
+  "name": "admission-api",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "scripts": {
+    "test": "node logic.test.js && node agent/runtime.test.mjs"
+  }
+}

@@ -1,0 +1,153 @@
+<view class="page">
+  <text class="eyebrow">ADMISSION REFERENCE</text>
+  <view class="page-title">港新硕士申请</view>
+  <view class="lead">填写申请背景，选择目标范围，获得项目匹配和概率参考。公开案例只是辅助证据，最终判断仍结合项目资料和个人背景。</view>
+
+  <view class="section">
+    <view class="section-title">学术背景</view>
+    <view class="field">
+      <text class="label">本科院校</text>
+      <input value="{{form.university}}" bindinput="onUniversityInput" placeholder="输入学校名称，例如：华中科技大学" />
+      <view class="school-match" wx:if="{{schoolMatches.length}}">
+        <view class="school-match-title">请选择正式学校名称</view>
+        <view class="school-match-option" wx:for="{{schoolMatches}}" wx:key="id" data-index="{{index}}" bindtap="selectUniversity">
+          <view>{{item.name}}</view>
+          <view class="school-match-meta">{{item.meta}}</view>
+        </view>
+      </view>
+      <view class="school-state" wx:if="{{schoolSearchState === 'searching'}}">正在检索学校名录…</view>
+      <view class="school-state" wx:if="{{schoolSearchState === 'empty'}}">没有找到匹配学校，请继续输入更完整的名称。</view>
+      <view class="school-bound" wx:if="{{schoolBound}}">已绑定：{{schoolMetaText}}</view>
+      <text class="hint">必须从候选项中点选学校完成绑定，系统才能识别院校层次；不确定时不要随意选择。</text>
+    </view>
+    <view class="field">
+      <text class="label">本科专业</text>
+      <input value="{{form.major}}" bindinput="onMajorInput" placeholder="输入专业名称，例如：电子信息工程" />
+      <view class="school-match" wx:if="{{majorMatches.length}}">
+        <view class="school-match-title">请选择教育部专业主表中的正式名称</view>
+        <view class="school-match-option" wx:for="{{majorMatches}}" wx:key="code" data-index="{{index}}" bindtap="selectMajor">
+          <view>{{item.name}}</view>
+          <view class="school-match-meta">{{item.meta}}</view>
+        </view>
+      </view>
+      <view class="school-state" wx:if="{{majorSearchState === 'searching'}}">正在检索专业主表…</view>
+      <view class="school-state" wx:if="{{majorSearchState === 'empty'}}">没有找到匹配专业，请继续输入更完整的名称。</view>
+      <view class="school-bound" wx:if="{{majorBound}}">已绑定：{{majorMetaText}}</view>
+      <text class="hint">必须点选候选专业，系统才能同步专业代码和分析方向。</text>
+    </view>
+    <view class="field">
+      <text class="label">成绩制式</text>
+      <picker mode="selector" range="{{gpaScales}}" value="{{gpaScaleIndex}}" bindchange="onGpaScaleChange">
+        <view class="picker">{{form.gpaScale || '请选择成绩制式'}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="label">加权平均分 / GPA</text>
+      <input type="digit" value="{{form.gpaValue}}" data-key="gpaValue" bindinput="onTextInput" placeholder="填写成绩单中的官方成绩" />
+    </view>
+    <view class="field">
+      <text class="label">语言成绩（可选）</text>
+      <picker mode="selector" range="{{languageTests}}" value="{{languageIndex}}" bindchange="onLanguageChange">
+        <view class="picker">{{form.languageTest || '请选择考试类型'}}</view>
+      </picker>
+      <input class="language-score" type="digit" value="{{form.language}}" data-key="language" bindinput="onTextInput" placeholder="只填写分数，例如：7 或 100" />
+      <text class="hint">只填写数字；考试类型已在上方选择。例如 IELTS 填 7，TOEFL 填 100。</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">经历概况（可选）</view>
+    <view class="repeat-section">
+      <view class="repeat-heading"><text class="label">实习经历</text></view>
+      <text class="hint" wx:if="{{!internships.length}}">没有实习可以留空；添加后选择实习方向，单位类型可多选也可不填。</text>
+      <view class="repeat-row" wx:for="{{internships}}" wx:key="id">
+        <text class="repeat-label">实习方向</text>
+        <picker range="{{directionLabels}}" value="{{item.directionIndex}}" data-list="internships" data-index="{{index}}" data-key="direction" bindchange="onExperiencePickerChange"><view class="picker">{{directionLabels[item.directionIndex]}}</view></picker>
+        <text class="repeat-label">单位类型（可选，可多选）</text>
+        <checkbox-group data-index="{{index}}" bindchange="onInternshipTypeChange">
+          <view class="choice-grid repeat-check-grid">
+            <label class="choice" wx:for="{{item.companyTypeOptions}}" wx:for-item="companyType" wx:key="value">
+              <checkbox value="{{companyType.value}}" checked="{{companyType.checked}}" />
+              <text class="choice-text">{{companyType.label}}</text>
+            </label>
+          </view>
+        </checkbox-group>
+        <text class="remove-link" data-index="{{index}}" data-list="internships" bindtap="removeExperience">删除</text>
+      </view>
+      <button class="repeat-add-button" bindtap="addInternship">＋ 添加一段实习</button>
+    </view>
+    <view class="repeat-section">
+      <view class="repeat-heading"><text class="label">科研 / 项目经历</text></view>
+      <text class="hint" wx:if="{{!researches.length}}">没有科研或项目可以留空；添加后只需选择研究方向。</text>
+      <view class="repeat-row" wx:for="{{researches}}" wx:key="id">
+        <picker range="{{directionLabels}}" value="{{item.directionIndex}}" data-list="researches" data-index="{{index}}" data-key="direction" bindchange="onExperiencePickerChange"><view class="picker">{{directionLabels[item.directionIndex]}}</view></picker>
+        <text class="remove-link" data-index="{{index}}" data-list="researches" bindtap="removeExperience">删除</text>
+      </view>
+      <button class="repeat-add-button" bindtap="addResearch">＋ 添加一段科研 / 项目</button>
+    </view>
+    <view class="repeat-section">
+      <view class="repeat-heading"><text class="label">竞赛 / 奖项</text></view>
+      <text class="hint" wx:if="{{!awards.length}}">没有竞赛或奖项可以留空；添加后选择级别和竞赛方向。</text>
+      <view class="repeat-row" wx:for="{{awards}}" wx:key="id">
+        <picker range="{{awardLevelLabels}}" value="{{item.levelIndex}}" data-list="awards" data-index="{{index}}" data-key="level" bindchange="onExperiencePickerChange"><view class="picker">{{awardLevelLabels[item.levelIndex]}}</view></picker>
+        <picker range="{{awardCategoryLabels}}" value="{{item.categoryIndex}}" data-list="awards" data-index="{{index}}" data-key="category" bindchange="onExperiencePickerChange"><view class="picker">{{awardCategoryLabels[item.categoryIndex]}}</view></picker>
+        <text class="remove-link" data-index="{{index}}" data-list="awards" bindtap="removeExperience">删除</text>
+      </view>
+      <button class="repeat-add-button" bindtap="addAward">＋ 添加一个竞赛 / 奖项</button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">申请范围</view>
+    <view class="field">
+      <text class="label">申请地区</text>
+      <checkbox-group bindchange="onRegionChange">
+        <view class="choice-grid">
+          <label class="choice" wx:for="{{regionOptions}}" wx:key="value">
+            <checkbox value="{{item.value}}" checked="{{item.checked}}" />
+            <text class="choice-text">{{item.label}}</text>
+          </label>
+        </view>
+      </checkbox-group>
+    </view>
+    <view class="field">
+      <text class="label">申请学校范围</text>
+      <checkbox-group bindchange="onSchoolChange">
+        <view class="choice-grid">
+          <block wx:for="{{schoolOptions}}" wx:key="value">
+            <label class="choice" wx:if="{{item.visible}}">
+              <checkbox value="{{item.value}}" checked="{{item.checked}}" />
+              <text class="choice-text">{{item.label}}</text>
+            </label>
+          </block>
+        </view>
+      </checkbox-group>
+      <label class="choice select-all-choice"><checkbox checked="{{allSchoolsSelected}}" bindchange="onAllSchoolChange" /><text class="choice-text">全部当前地区学校</text></label>
+      <text class="hint">默认选择当前地区全部学校；也可以只保留想申请的学校。</text>
+    </view>
+    <view class="field">
+      <text class="label">目标方向</text>
+      <checkbox-group bindchange="onFieldChange">
+        <view class="choice-grid">
+          <label class="choice" wx:for="{{fieldOptions}}" wx:key="value">
+            <checkbox value="{{item.value}}" checked="{{item.checked}}" />
+            <text class="choice-text">{{item.label}}</text>
+          </label>
+        </view>
+      </checkbox-group>
+      <label class="choice select-all-choice"><checkbox checked="{{allFieldsSelected}}" bindchange="onAllFieldChange" /><text class="choice-text">不限方向（全部项目）</text></label>
+      <text class="hint">默认不限方向；选择后会优先保留对应项目。</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <checkbox-group bindchange="onConsentChange">
+      <label class="consent">
+        <checkbox value="consent" checked="{{consent}}" />
+        <text>我已了解：填写信息、分析结果和问卷反馈会被保存，用于改进服务；请勿填写身份证号、联系方式、成绩单原件等不必要的敏感信息。</text>
+      </label>
+    </checkbox-group>
+    <view class="status" wx:if="{{error}}">{{error}}</view>
+    <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{submitting ? '正在分析' : '生成概率档案'}}</button>
+  </view>
+</view>

@@ -1,9 +1,16 @@
 import { courseGroups, programmes, schools } from "./data.mjs";
 import { analyzeAll, standardizeGpa } from "./case-analysis.mjs";
 import { majorMaster } from "./major-master.mjs";
+import { buildComparison } from "./comparison.mjs";
+import { readableEvidenceIds } from "./display-evidence.mjs";
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
+const desktopSettingsButton = $("#desktop-model-settings");
+if (window.admissionDesktop?.openSettings) {
+  desktopSettingsButton.hidden = false;
+  desktopSettingsButton.addEventListener("click", () => window.admissionDesktop.openSettings());
+}
 const escapeHtml = value => String(value ?? "")
   .replaceAll("&", "&amp;")
   .replaceAll("<", "&lt;")
@@ -167,6 +174,7 @@ let latestResults = [];
 let latestProfile = null;
 let personalizedInsights = {};
 let latestAnalysisId = null;
+let latestCalibrationValid = false;
 
 function saveState() {
   sessionStorage.setItem("admission-reference-v3", JSON.stringify(state));
@@ -390,9 +398,9 @@ function updateGpaControl(convertValue = true) {
   const scale = $("#gpa-scale").value;
   const input = $("#gpa-value");
   const config = {
-    "100": { label: "加权平均分", max: 100, help: "填写成绩单中的百分制加权平均分；系统不会把它简单除以25当作正式GPA。" },
-    "4": { label: "四分制 GPA", max: 4, help: "填写成绩单上的官方四分制GPA；只与明确标注相同分制的案例比较。" },
-    "5": { label: "五分制 GPA", max: 5, help: "填写成绩单上的官方五分制GPA；没有学校换算表时不反推4.0 GPA。" }
+    "100": { label: "加权平均分（推荐）", max: 100, help: "填写成绩单中的百分制加权平均分；系统不会把它简单除以25当作正式GPA。" },
+    "4": { label: "四分制 GPA", max: 4, help: "同分制可比案例较少，分析效果不佳；如成绩单另有官方加权均分，建议填写加权均分。" },
+    "5": { label: "五分制 GPA", max: 5, help: "同分制可比案例较少，分析效果不佳；不会把 3.5/5 换算成 70 分。如成绩单另有官方加权均分，建议填写加权均分。" }
   }[scale] || { label: "成绩", max: 100, help: "请选择成绩制式，并填写成绩单中的官方成绩。" };
   $("#gpa-label").textContent = config.label;
   $("#gpa-help").textContent = config.help;
@@ -528,10 +536,13 @@ function position(value, min, max) {
 
 function gpaEvidence(result) {
   const stats = result.evidence.gpa;
+  const percent = stats.scale === "985_EQUIVALENT_PERCENT";
+  const scoreName = percent ? "985基准比较分" : stats.scale === "GPA_5" ? "五分制 GPA"
+    : stats.scale === "GPA_4_3" ? "4.3分制 GPA" : "四分制 GPA";
   if (!stats.available) {
     return `
       <div class="evidence-block gpa-evidence">
-        <h3>985等效GPA位置</h3>
+        <h3>GPA案例位置</h3>
         <p>${escapeHtml(stats.note || "当前没有同分制的审核案例，因此不显示容易误导的GPA分布。")}</p>
       </div>
     `;
@@ -539,22 +550,24 @@ function gpaEvidence(result) {
   const domainMin = Math.min(stats.min, stats.user);
   const domainMax = Math.max(stats.max, stats.user);
   const sameTier = stats.sameTier
-    ? `同层案例 ${stats.sameTierCount} 个，985等效分中位数 ${formatNumber(stats.sameTier.median)}，范围 ${formatNumber(stats.sameTier.min)}–${formatNumber(stats.sameTier.max)}。`
+    ? `同层案例 ${stats.sameTierCount} 个，${scoreName}中位数 ${formatNumber(stats.sameTier.median)}，范围 ${formatNumber(stats.sameTier.min)}–${formatNumber(stats.sameTier.max)}。`
     : "当前没有同院校层次且同分制案例，暂不单独展示同层参照。";
-  const positionText = stats.user > stats.max
-    ? `你的985等效分高于当前最高案例 ${formatNumber(stats.user - stats.max)}。`
+  const positionText = stats.positionNote && stats.total < 5
+    ? stats.positionNote
+    : stats.user > stats.max
+    ? `你的${scoreName}高于当前最高案例 ${formatNumber(stats.user - stats.max)}。`
     : stats.user < stats.min
-      ? `你的985等效分低于当前最低案例 ${formatNumber(stats.min - stats.user)}。`
-      : `你的985等效分在 ${stats.total} 个可换算案例中由高到低位于第 ${stats.rank} 位。`;
+      ? `你的${scoreName}低于当前最低案例 ${formatNumber(stats.min - stats.user)}；公开成功案例最低分不是项目官方录取门槛。`
+      : `按 ${stats.total} 条同分制可比成功案例的分数排序，你的${scoreName}若插入，约位于第 ${stats.rank} 位。`;
   return `
     <div class="evidence-block gpa-evidence">
-      <h3>985等效GPA位置</h3>
-      <div class="range-plot" aria-label="你的985等效分与录取案例分布">
+      <h3>${scoreName}与案例参照</h3>
+      <div class="range-plot" aria-label="你的${scoreName}与录取案例分布">
         <div class="range-line">
           <i class="case-range" style="left:${position(stats.min, domainMin, domainMax)}%;width:${position(stats.max, domainMin, domainMax) - position(stats.min, domainMin, domainMax)}%"></i>
           <i class="stat-tick median-tick" style="left:${position(stats.median, domainMin, domainMax)}%" title="中位数 ${formatNumber(stats.median)}"></i>
           <i class="stat-tick mean-tick" style="left:${position(stats.mean, domainMin, domainMax)}%" title="平均数 ${formatNumber(stats.mean)}"></i>
-          <i class="user-point" style="left:${position(stats.user, domainMin, domainMax)}%" title="你的985等效分 ${formatNumber(stats.user)}"></i>
+          <i class="user-point" style="left:${position(stats.user, domainMin, domainMax)}%" title="你的${scoreName} ${formatNumber(stats.user)}"></i>
         </div>
       </div>
       <dl class="stat-row">
@@ -562,9 +575,10 @@ function gpaEvidence(result) {
         <div><dt>平均</dt><dd>${formatNumber(stats.mean)}</dd></div>
         <div><dt>中位</dt><dd>${formatNumber(stats.median)}</dd></div>
         <div><dt>最高</dt><dd>${formatNumber(stats.max)}</dd></div>
-        <div class="is-user"><dt>你的等效分</dt><dd>${formatNumber(stats.user)}</dd></div>
+        <div class="is-user"><dt>你的${percent ? "比较分" : "GPA"}</dt><dd>${formatNumber(stats.user)}</dd></div>
       </dl>
       <p>${positionText}</p><p>${sameTier}</p>
+      <p>${escapeHtml(stats.normalization?.note || "")}</p>
     </div>
   `;
 }
@@ -585,7 +599,7 @@ function languageEvidence(result) {
   const requiredTick = Number.isFinite(stats.required)
     ? `<i class="stat-tick required-tick" style="left:${position(stats.required, domainMin, domainMax)}%" title="项目参考线 ${formatNumber(stats.required)}"></i>` : "";
   const requirementText = Number.isFinite(stats.required)
-    ? `项目参考线 ${formatNumber(stats.required)}，你的成绩${stats.user >= stats.required ? "已经达到" : "尚未达到"}要求。`
+    ? `项目总分参考线 ${formatNumber(stats.required)}，你的总分${stats.user >= stats.required ? "已经达到" : "尚未达到"}；当前版本不判断单项分数。`
     : `当前项目资料库尚未录入${escapeHtml(stats.test)}对应的官方参考线。`;
   return `
     <div class="evidence-block language-evidence">
@@ -621,8 +635,7 @@ function evidenceSummary(result) {
 function profileForApi(profile) {
   return {
     ...profile,
-    gpaStandardization: standardizeGpa(profile),
-    major: optionLabel(majorOptions, profile.major),
+    major: profile.major,
     internships: profile.internships.map(item => ({
       ...item,
       companyTier: optionLabel(companyTierOptions, item.companyTier),
@@ -680,7 +693,9 @@ function renderProgrammeDetail(programme) {
     const provenance = programme._programmeProvenance?.[field];
     const badge = provenance === "derived-ai" || provenance === "derived"
       ? `<small class="programme-provenance">AI基于官方项目资料推断</small>`
-      : "";
+      : provenance === "official-structured-snapshot"
+        ? `<small class="programme-provenance">本地官方资料结构化快照（${escapeHtml(programme._programmeEvidenceSnapshot || "日期未记录")}）；未复核当前官网</small>`
+        : "";
     return `<p>${text(value, fallback)}${badge}</p>`;
   };
   const positioning = [programme.overview, programme.duration].filter(Boolean).join(" ");
@@ -709,21 +724,73 @@ function renderProgrammeDetail(programme) {
   `;
 }
 
-function renderResults(profile, results = analyzeAll(profile, filteredProgrammes()), insights = {}, analysisNote = "") {
+function assessmentFailureText(error) {
+  const message = String(error || "");
+  if (/too many requests|concurrency|rate limit/i.test(message)) return "模型服务并发受限，本项目未完成；请稍后重新分析。";
+  if (/证据契约校验/.test(message)) return "模型返回内容未通过证据校验，因此不显示数值。";
+  if (/超时|timeout/i.test(message)) return "模型请求超时，本项目未完成；请稍后重新分析。";
+  return message ? "模型调用或输出校验未完成，因此不显示数值。" : "模型未返回可用判断，因此不显示数值。";
+}
+
+function renderAssessmentReview(insight) {
+  const reasoning = Array.isArray(insight.reasoning) ? insight.reasoning : [];
+  const uncertainties = Array.isArray(insight.uncertainties) ? insight.uncertainties : [];
+  const sources = new Map((insight.reviewEvidence || []).map(item => [String(item.id), item]));
+  const citations = Array.isArray(insight.evidenceUsed) ? insight.evidenceUsed : [];
+  const show = value => escapeHtml(readableEvidenceIds(value));
+  const provenanceLabel = value => value === "public-case" ? "本地案例摘要"
+    : value === "catalogue-card" ? "项目目录卡片"
+      : String(value).startsWith("derived") ? "未核验的项目方向推断" : "本地项目资料快照";
+  return `<div class="assessment-reasoning">
+    <h4>判断依据与待核对项</h4>
+    <p class="personalized-status">以下依据来自本机记录，可展开核对；本次未实时联网。未核验的推断不能当作官方要求。</p>
+    <h5>模型判断理由</h5>
+    ${reasoning.length ? `<ul>${reasoning.map(item => `<li>${show(item)}</li>`).join("")}</ul>` : `<p class="personalized-status">模型未留下可展示的判断理由。</p>`}
+    <h5>分析依据</h5>
+    ${citations.length ? citations.map(item => {
+      const source = sources.get(String(item.documentId));
+      return `<div class="assessment-citation">
+        <p><strong>${source ? provenanceLabel(source.provenance) : "引用依据未保存"}</strong></p>
+        <p>${show(item.comparison || "模型未说明如何使用这项依据")}${item.missing ? " · 信息有缺口" : ""}</p>
+        ${source ? `<details class="assessment-source"><summary>查看依据原文</summary><p>${show(source.text || "暂无文字")}</p>${source.checkedAt ? `<small>资料记录日期：${escapeHtml(String(source.checkedAt).slice(0, 10))}</small>` : ""}</details>` : `<p class="personalized-status">这份旧记录没有保存可供核对的依据；请重新分析或查看项目资料。</p>`}
+      </div>`;
+    }).join("") : `<p class="personalized-status">模型未留下逐条引用，不能据此验收事实准确性。</p>`}
+    <h5>模型列出的不确定性</h5>
+    ${uncertainties.length ? `<ul>${uncertainties.map(item => `<li>${show(item)}</li>`).join("")}</ul>` : `<p class="personalized-status">模型未列出；不等于没有风险。请对照官方页面复核申请条件。</p>`}
+  </div>`;
+}
+
+function renderResults(profile, results = analyzeAll(profile, filteredProgrammes()), insights = {}, analysisNote = "", calibrationValid = false) {
   latestProfile = profile;
+  latestCalibrationValid = calibrationValid;
   personalizedInsights = { insights };
-  latestResults = results;
+  latestResults = [...results].sort((left, right) => {
+    const leftReady = left.result?.assessmentAvailable && Number.isFinite(left.result.center);
+    const rightReady = right.result?.assessmentAvailable && Number.isFinite(right.result.center);
+    return Number(rightReady) - Number(leftReady) || Number(right.result?.center || 0) - Number(left.result?.center || 0);
+  });
+  const comparison = buildComparison(latestResults);
   const hasAssessment = latestResults.some(item => item.result.assessmentAvailable);
   const standardized = standardizeGpa(profile);
   const scoreLabel = standardized.rawScale === "100" ? "百分制" : standardized.rawScale === "4" ? "4.0 GPA" : standardized.rawScale === "5" ? "5.0 GPA" : "成绩";
-  $("#results-subtitle").textContent = `${profile.university} · ${profile.gpaValue}/${scoreLabel} · ${profile.languageTest} ${profile.language}${hasAssessment ? " · 概率参考已生成" : " · 等待分析服务"}`;
+  $("#results-subtitle").textContent = `${profile.university} · ${profile.gpaValue}/${scoreLabel} · ${profile.languageTest} ${profile.language}${hasAssessment ? " · 已生成申请评估" : " · 分析未完成"}`;
   $("[data-view-target='results']").disabled = false;
   $("#survey-form").hidden = state.surveyCompleted || !latestAnalysisId;
-  $("#download-panel").hidden = !state.surveyCompleted;
-  $(".result-note").textContent = analysisNote || "页面只整理项目资料和案例分布；概率必须由AI读取RAG证据后生成，未连接AI时不会显示替代数字。";
+  $("#feedback-saved").hidden = !state.surveyCompleted;
+  $("#download-panel").hidden = false;
+  $(".result-note").textContent = `公开案例只有成功样本，模型数值未经统计校准，不是真实录取率。${analysisNote || "请先看项目要求、相似案例及信息缺口。"}`;
+  $("#comparison-summary").innerHTML = `
+    <h2>数值依据</h2>
+    <p>你的申请资料 + 本地项目资料（部分项目仅有目录信息或未核验推断）+ 本地审核成功案例统计及最多 6 条代表案例，由你配置的模型综合分析。本次分析不会实时浏览学校官网。</p>
+    <p>${comparison.total ? `已有 ${comparison.total} 个项目获得模型参考值，${latestCalibrationValid ? '按模型横向排序展示（仅通过格式与部分证据边界检查）' : '仅按单项目估计值从高到低展示，横向排序未通过校验'}；无数值项目置于末尾。` : "本次没有项目获得通过校验的模型参考值。"}百分比未经成功与失败样本校准，不是真实录取率。</p>`;
 
-  $("#results-list").innerHTML = latestResults.map(({ programme, result }, index) => {
-    const hasAssessment = result.assessmentAvailable && Number.isFinite(result.center);
+  $("#results-list").innerHTML = latestResults.map(({ programme, result, assessmentError }, index) => {
+    const position = comparison.byId.get(programme.id);
+    const hasAssessment = Boolean(position);
+    const caseCount = Number(programme.caseCount ?? result.evidence?.caseCount ?? programme.cases?.length ?? 0);
+    const evidenceLabel = caseCount === 0 ? "没有公开案例，判断依据有限" : caseCount < 5
+      ? `仅 ${caseCount} 条成功案例，判断依据有限` : `${caseCount} 条公开成功案例`;
+    const fitClue = insights[programme.id]?.fit?.find(item => typeof item === "string" && item.trim());
     return `
     <article class="programme-record">
       <header class="programme-heading">
@@ -733,9 +800,12 @@ function renderResults(profile, results = analyzeAll(profile, filteredProgrammes
           <p>${escapeHtml(programme.name)}</p>
         </div>
         <div class="probability">
-          <span>${hasAssessment ? "AI案例推断结果" : "AI案例推断"}</span>
-          <strong>${hasAssessment ? `${result.center}%` : "待分析"}</strong>
-          <em>${hasAssessment ? `参考范围 ${result.low}%–${result.high}%` : "未生成概率与范围"}</em>
+          <span>模型机会参考 · 未经统计校准</span>
+          <strong>${hasAssessment ? `${result.center}%` : "暂无数值"}</strong>
+          ${hasAssessment ? `<span>参考范围 ${result.low}%–${result.high}% · ${latestCalibrationValid && position.total > 1 ? `相对第 ${position.rank}/${position.total}` : position.total > 1 ? '横向排序未通过校验' : "仅 1 个项目，无法排序"}</span>` : ""}
+          <em>${evidenceLabel}</em>
+          <p class="experimental-value">${hasAssessment ? "模型估计，非真实录取率；请核对官方申请条件。" : escapeHtml(assessmentFailureText(assessmentError))}</p>
+          ${hasAssessment && fitClue ? `<p class="result-rationale">匹配线索：${escapeHtml(readableEvidenceIds(fitClue))}</p>` : ""}
         </div>
       </header>
       <details class="analysis-detail">
@@ -751,12 +821,12 @@ function renderResults(profile, results = analyzeAll(profile, filteredProgrammes
         </div>
         <section class="personalized-section" data-personalized="${programme.id}">
           <h3>你的个性化分析</h3>
-          ${insights[programme.id]
-            ? `<div class="personalized-grid">
-                <div><h4>你与项目的匹配点、优势与劣势</h4><ul>${(insights[programme.id].fit || []).map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
-                <div><h4>PS / CV怎么写</h4><ul>${(insights[programme.id].psCv || []).map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
+          ${hasAssessment && insights[programme.id]
+            ? `${renderAssessmentReview(insights[programme.id])}<div class="personalized-grid">
+                <div><h4>匹配点与已知劣势</h4><ul>${(insights[programme.id].fit || []).map(item => `<li>${escapeHtml(readableEvidenceIds(item))}</li>`).join("")}</ul></div>
+                <div><h4>PS / CV怎么写</h4><ul>${(insights[programme.id].psCv || []).map(item => `<li>${escapeHtml(readableEvidenceIds(item))}</li>`).join("")}</ul></div>
               </div>`
-            : `<p class="personalized-status">本次未连接分析API，因此不会生成概率或个性化建议。项目资料与案例分布仍可正常查看。</p>`}
+            : `<p class="personalized-status">本项目未通过模型输出校验，或本次调用未完成；无法提供可靠的个性化分析。仍可查看项目资料与公开案例。</p>`}
         </section>
         <section class="nearest-case">
           <h3>最接近的录取案例</h3>
@@ -779,8 +849,8 @@ const processingCopy = {
   profile: ["正在核对申请背景", "验证成绩、课程与经历信息。"],
   rag: ["正在检索项目与案例库", "读取目标地区、官方项目资料与近五年公开案例。"],
   evidence: ["正在整理案例证据", "汇总GPA、语言、院校与公开经历，不使用人工概率公式。"],
-  ai: ["正在生成项目判断", "调用模型基于RAG证据生成概率参考和个性化分析。"],
-  archive: ["正在整理概率档案", "按概率参考值整理项目结果。"]
+  ai: ["正在生成项目判断", "调用你配置的模型，结合项目资料和案例证据分析。"],
+  archive: ["正在整理申请评估", "按项目判断整理结果。"]
 };
 
 function updateProcessing(stage, progress, statusOverride = "") {
@@ -803,7 +873,7 @@ const briefPause = (milliseconds = 180) => new Promise(resolve => setTimeout(res
 
 async function runAnalysis(profile) {
   setView("processing");
-  $("#processing-note").textContent = "本地只整理可核查证据，不运行人工概率公式；概率判断必须来自AI对RAG证据的综合分析。";
+  $("#processing-note").textContent = "本机读取案例和项目资料；申请资料会发送给你配置的模型服务商。";
   updateProcessing("profile", 8);
   await briefPause();
 
@@ -819,6 +889,7 @@ async function runAnalysis(profile) {
   let results = localResults;
   let insights = {};
   let analysisNote = "";
+  let calibrationValid = false;
   try {
     const response = await fetch("/api/analyze", {
       method: "POST",
@@ -830,17 +901,18 @@ async function runAnalysis(profile) {
     latestAnalysisId = data.analysisId || null;
     results = data.results?.length ? data.results : localResults;
     insights = data.insights || {};
+    calibrationValid = data.assessmentExecution?.calibrationValid === true;
     analysisNote = data.message || "已完成项目与案例检索，并由AI基于检索证据生成项目判断。结果不代表学校承诺。";
   } catch (error) {
     latestAnalysisId = null;
-    analysisNote = `当前未连接分析服务：${error.message}。本页只展示项目资料和案例分布，不生成概率。`;
+    analysisNote = `分析未完成：${error.message}。本页只展示项目资料和案例分布，不生成模型数值。`;
     $("#processing-note").textContent = analysisNote;
   }
 
   updateProcessing("archive", 92);
   await briefPause(220);
-  renderResults(profile, results, insights, analysisNote);
-  updateProcessing("archive", 100, "概率档案已生成。正在打开结果。 ");
+  renderResults(profile, results, insights, analysisNote, calibrationValid);
+  updateProcessing("archive", 100, "申请评估已整理。正在打开结果。");
   await briefPause(120);
   setView("results");
 }
@@ -848,27 +920,41 @@ async function runAnalysis(profile) {
 function downloadReport() {
   const format = $("#export-format").value;
   const profile = collectProfile();
-  const rows = latestResults.map(({ programme, result }) => ({
-    project: `${programme.university} ${programme.nameZh}`,
-    probability: result.assessmentAvailable ? `${result.center}%（参考范围 ${result.low}%–${result.high}%）` : "分析API未生成",
-    fit: personalizedInsights.insights?.[programme.id]?.fit?.join("；") || "个性化分析API未生成",
-    psCv: personalizedInsights.insights?.[programme.id]?.psCv?.join("；") || "个性化分析API未生成",
-    url: programme.officialUrl
-  }));
+  const comparison = buildComparison(latestResults);
+  const rows = latestResults.map(({ programme, result, assessmentError }) => {
+    const insight = personalizedInsights.insights?.[programme.id] || {};
+    const sources = new Map((insight.reviewEvidence || []).map(item => [String(item.id), item]));
+    const show = value => readableEvidenceIds(value);
+    return {
+      project: `${programme.university} ${programme.nameZh}`,
+      assessment: comparison.byId.has(programme.id)
+        ? `模型参考值 ${result.center}%（范围 ${result.low}%–${result.high}%；${latestCalibrationValid && comparison.total > 1 ? `相对第 ${comparison.byId.get(programme.id).rank}/${comparison.total}` : comparison.total > 1 ? '横向排序未通过校验，仅按单项目估计值展示' : "仅1个项目，无法排序"}；未经校准，非真实录取率）`
+        : `未生成模型数值：${assessmentFailureText(assessmentError)}`,
+      fit: insight.fit?.map(show).join("；") || "个性化分析API未生成",
+      psCv: insight.psCv?.map(show).join("；") || "个性化分析API未生成",
+      reasoning: insight.reasoning?.map(show).join("；") || "未保存模型判断理由",
+      citations: (insight.evidenceUsed || []).map(item => {
+        const source = sources.get(String(item.documentId));
+        return `${show(item.comparison || "模型未说明如何使用这项依据")}；${source ? `${source.provenance === "public-case" ? "本地案例摘要" : source.provenance === "catalogue-card" ? "项目目录卡片" : String(source.provenance).startsWith("derived") ? "未核验的项目方向推断" : "本地项目资料快照"}：${show(String(source.text || "").replace(/\s+/g, " "))}` : "本次未保存对应依据"}`;
+      }).join("；") || "未保存模型引用",
+      uncertainties: insight.uncertainties?.map(show).join("；") || "模型未列出，不等于没有风险",
+      url: programme.officialUrl
+    };
+  });
   let content;
   let type;
   if (format === "csv") {
     const escapeCsv = value => `"${String(value).replaceAll('"', '""')}"`;
-    content = ["项目,录取概率参考值,个性化匹配点,PS与CV建议,官方网址", ...rows.map(row => Object.values(row).map(escapeCsv).join(","))].join("\n");
+    content = ["项目,申请评估,个性化匹配点,PS与CV建议,模型判断理由,引用与本地资料,模型列出的不确定性,官方网址", ...rows.map(row => Object.values(row).map(escapeCsv).join(","))].join("\n");
     type = "text/csv;charset=utf-8";
   } else if (format === "md") {
-    content = [`# 概率档案`, ``, `${profile.university}，GPA ${profile.gpaValue}/${profile.gpaScale}制，${profile.languageTest} ${profile.language}`, ``];
-    rows.forEach((row, index) => content.push(`## ${index + 1}. ${row.project}`, ``, `- 录取概率参考值：${row.probability}`, `- 个性化匹配点：${row.fit}`, `- PS / CV建议：${row.psCv}`, `- 官方网址：${row.url}`, ``));
+    content = [`# 申请评估`, ``, `公开案例只有成功样本；实验性 AI 数值未经校准，不是真实录取率。`, ``, `${profile.university}，GPA ${profile.gpaValue}/${profile.gpaScale}制，${profile.languageTest} ${profile.language}`, ``];
+    rows.forEach((row, index) => content.push(`## ${index + 1}. ${row.project}`, ``, `- 申请评估：${row.assessment}`, `- 个性化匹配点：${row.fit}`, `- PS / CV建议：${row.psCv}`, `- 模型判断理由：${row.reasoning}`, `- 引用与本地资料：${row.citations}`, `- 模型列出的不确定性：${row.uncertainties}`, `- 官方网址：${row.url}`, ``));
     content = content.join("\n");
     type = "text/markdown;charset=utf-8";
   } else {
-    content = [`概率档案`, `${profile.university} / GPA ${profile.gpaValue}/${profile.gpaScale}制 / ${profile.languageTest} ${profile.language}`, ``];
-    rows.forEach((row, index) => content.push(`${index + 1}. ${row.project}`, `录取概率参考值：${row.probability}`, `个性化匹配点：${row.fit}`, `PS / CV建议：${row.psCv}`, `官方网址：${row.url}`, ``));
+    content = [`申请评估`, `公开案例只有成功样本；实验性 AI 数值未经校准，不是真实录取率。`, `${profile.university} / GPA ${profile.gpaValue}/${profile.gpaScale}制 / ${profile.languageTest} ${profile.language}`, ``];
+    rows.forEach((row, index) => content.push(`${index + 1}. ${row.project}`, `申请评估：${row.assessment}`, `个性化匹配点：${row.fit}`, `PS / CV建议：${row.psCv}`, `模型判断理由：${row.reasoning}`, `引用与本地资料：${row.citations}`, `模型列出的不确定性：${row.uncertainties}`, `官方网址：${row.url}`, ``));
     content = content.join("\n");
     type = "text/plain;charset=utf-8";
   }
@@ -876,7 +962,7 @@ function downloadReport() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `概率档案.${format}`;
+  link.download = `申请评估.${format}`;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -1042,8 +1128,7 @@ $("#survey-form").addEventListener("submit", async event => {
     state.surveyCompleted = true;
     saveState();
     event.currentTarget.hidden = true;
-    $("#download-panel").hidden = false;
-    $("#download-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    $("#feedback-saved").hidden = false;
   } catch (error) {
     status.textContent = error.message;
     status.hidden = false;

@@ -1,0 +1,4 @@
+{
+  "desc": "港新硕士申请用户端",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

@@ -12,6 +12,32 @@ function selectedValues(selector) {
   return [...($(selector)?.selectedOptions || [])].map(option => option.value).filter(Boolean);
 }
 
+let collectorProgrammes = [];
+const selectedProgrammeIds = new Set();
+function renderProgrammeSelection() {
+  const selected = collectorProgrammes.filter(programme => selectedProgrammeIds.has(programme.id));
+  $("#collector-programme-selected").innerHTML = selected.length
+    ? selected.map(programme => `<button type="button" data-remove-programme="${escapeHtml(programme.id)}" aria-label="移除 ${escapeHtml(programme.school)} ${escapeHtml(programme.name)}">${escapeHtml(programme.school)} · ${escapeHtml(programme.name)} ×</button>`).join("")
+    : "尚未指定项目";
+  $("#collector-import-mastermate").disabled = selected.length > 0;
+  if (selected.length) $("#collector-import-mastermate").checked = false;
+}
+
+function renderProgrammeResults() {
+  const terms = $("#collector-programme-search").value.normalize("NFKC").toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const matches = terms.length ? collectorProgrammes.filter(programme => {
+    const text = `${programme.institutionId} ${programme.school} ${programme.schoolEn} ${programme.name} ${programme.nameEn}`.normalize("NFKC").toLowerCase();
+    return !selectedProgrammeIds.has(programme.id) && terms.every(term => text.includes(term));
+  }) : [];
+  const list = $("#collector-programme-results");
+  list.innerHTML = matches.length
+    ? matches.slice(0, 40).map(programme => `<option value="${escapeHtml(programme.id)}">${escapeHtml(programme.school)} · ${escapeHtml(programme.name)}${programme.nameEn && programme.nameEn !== programme.name ? ` / ${escapeHtml(programme.nameEn)}` : ""}</option>`).join("")
+    : `<option value="" disabled>${terms.length ? "没有匹配项目" : "输入名称后显示匹配项目"}</option>`;
+  list.selectedIndex = -1;
+  $("#collector-programme-match-count").textContent = terms.length ? `匹配 ${matches.length} 个项目${matches.length > 40 ? "，显示前 40 个，请继续输入缩小范围" : ""}` : `可搜索 ${collectorProgrammes.length} 个项目`;
+  $("#collector-programme-add").disabled = true;
+}
+
 function renderCollectorOptions(value) {
   const countries = value.countries || [];
   const schools = value.schools || [];
@@ -29,6 +55,10 @@ function renderCollectorOptions(value) {
   };
   countrySelect.addEventListener("change", renderSchools);
   renderSchools();
+  collectorProgrammes = value.programmes || [];
+  renderProgrammeResults();
+  renderProgrammeSelection();
+  $("#collector-start").disabled = false;
 }
 
 function renderSummary(value) {
@@ -37,11 +67,17 @@ function renderSummary(value) {
 }
 
 function renderCollectorStatus(value) {
+  if (value.desktop) {
+    document.querySelector('#logout').hidden = true;
+    document.querySelector('a[href="/analytics.html"]').hidden = true;
+  }
   const active = Boolean(value.active);
   const state = $("#collector-state");
   const scope = value.scope;
   const scopeLabel = scope
-    ? `范围：${scope.countries?.length ? scope.countries.join("、") : "全部地区"} · ${scope.institutions?.length ? `${scope.institutions.length}所学校` : "全部学校"} · ${scope.focusTags?.length ? scope.focusTags.join("、") : "全部方向"}`
+    ? scope.programmeIds?.length
+      ? `范围：指定 ${scope.programmeIds.length} 个项目`
+      : `范围：${scope.countries?.length ? scope.countries.join("、") : "全部地区"} · ${scope.institutions?.length ? `${scope.institutions.length}所学校` : "全部学校"} · ${scope.focusTags?.length ? scope.focusTags.join("、") : "全部方向"}`
     : "范围：未启动";
   state.textContent = active
     ? `运行中 · PID ${value.pid} · 启动于 ${value.startedAt || "未知"} · ${scopeLabel}`
@@ -171,10 +207,28 @@ async function load() {
 
 $("#refresh").addEventListener("click", load);
 $("#status").addEventListener("change", load);
+$("#collector-programme-search").addEventListener("input", renderProgrammeResults);
+$("#collector-programme-results").addEventListener("change", () => { $("#collector-programme-add").disabled = !$("#collector-programme-results").value; });
+$("#collector-programme-add").addEventListener("click", () => {
+  const id = $("#collector-programme-results").value;
+  if (!id) return;
+  selectedProgrammeIds.add(id);
+  renderProgrammeSelection();
+  renderProgrammeResults();
+});
+$("#collector-programme-selected").addEventListener("click", event => {
+  const id = event.target.closest("[data-remove-programme]")?.dataset.removeProgramme;
+  if (!id) return;
+  selectedProgrammeIds.delete(id);
+  renderProgrammeSelection();
+  renderProgrammeResults();
+});
 $("#collector-form").addEventListener("submit", async event => {
   event.preventDefault();
   const values = Object.fromEntries(new FormData(event.currentTarget).entries());
   const start = $("#collector-start");
+  const programmeIds = [...selectedProgrammeIds];
+  if (!window.confirm(`${programmeIds.length ? `仅尝试已指定的 ${programmeIds.length} 个项目。` : "按地区、学校和方向筛选项目。"}采集将访问公开网页并调用你配置的模型 API，可能产生费用。继续吗？`)) return;
   start.disabled = true;
   try {
     await json("/api/collector/start", {
@@ -189,6 +243,7 @@ $("#collector-form").addEventListener("submit", async event => {
         countries: selectedValues("#collector-countries"),
         institutions: selectedValues("#collector-institutions"),
         focusTags: selectedValues("#collector-focus-tags"),
+        programmeIds,
         importMastermate: values.importMastermate === "on"
       })
     });

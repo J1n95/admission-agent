@@ -33,14 +33,6 @@ function weightedSummary(entries) {
   return { weightedMean: round(weightedMean), weightedMedian, totalWeight: round(totalWeight) };
 }
 
-// Only used to position the user's own value inside its declared scale in the UI.
-// It is never used to convert a 4/5-point GPA into evidence comparable with a 100-point case.
-export function normalizeGpa(value, scale) {
-  if (scale === "4") return clamp(value / 4 * 100, 0, 100);
-  if (scale === "5") return clamp(value / 5 * 100, 0, 100);
-  return clamp(value, 0, 100);
-}
-
 const rounded = value => Number.isFinite(Number(value)) ? Math.round(Number(value) * 10) / 10 : null;
 
 const elite985 = new Set("北京大学 清华大学 中国人民大学 北京航空航天大学 北京理工大学 中国农业大学 北京师范大学 中央民族大学 南开大学 天津大学 大连理工大学 东北大学 吉林大学 哈尔滨工业大学 复旦大学 同济大学 上海交通大学 华东师范大学 南京大学 东南大学 浙江大学 中国科学技术大学 厦门大学 山东大学 中国海洋大学 武汉大学 华中科技大学 湖南大学 中南大学 中山大学 华南理工大学 四川大学 重庆大学 电子科技大学 西安交通大学 西北工业大学 西北农林科技大学 兰州大学 国防科技大学".split(" "));
@@ -59,23 +51,10 @@ function inferredSchoolClassification(profile = {}) {
   return "";
 }
 
-function interpolate(value, points) {
-  const bounded = clamp(value, points[0][0], points.at(-1)[0]);
-  const upperIndex = points.findIndex(([input]) => input >= bounded);
-  if (upperIndex <= 0) return points[0][1];
-  const [lowerInput, lowerOutput] = points[upperIndex - 1];
-  const [upperInput, upperOutput] = points[upperIndex];
-  return lowerOutput + (bounded - lowerInput) / (upperInput - lowerInput) * (upperOutput - lowerOutput);
-}
-
 export function gpaToComparablePercent(value, scale) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return null;
-  if (String(scale) === "100") return clamp(numeric, 0, 100);
-  if (String(scale) === "4") return rounded(interpolate(numeric, [[0, 0], [2, 65], [2.3, 70], [2.7, 75], [3, 80], [3.3, 85], [3.7, 90], [4, 100]]));
-  if (String(scale) === "4.3") return gpaToComparablePercent(numeric / 4.3 * 4, "4");
-  if (String(scale) === "5") return rounded(clamp(numeric / 5 * 100, 0, 100));
-  return null;
+  return String(scale) === "100" && numeric >= 0 && numeric <= 100 ? numeric : null;
 }
 
 export function estimateFourPointGpa(percent) {
@@ -107,7 +86,7 @@ function backgroundCorrection(profile = {}) {
 export function standardizeGpa(profile = {}) {
   const inputScale = String(profile.gpaScale || "");
   const scale = inputScale === "PERCENT_100" ? "100" : inputScale === "GPA_4" ? "4" : inputScale === "GPA_4_3" ? "4.3" : inputScale === "GPA_5" ? "5" : inputScale;
-  const value = Number(profile.gpaValue);
+  const value = profile.gpaValue == null || profile.gpaValue === "" ? NaN : Number(profile.gpaValue);
   const result = {
     rawScore: Number.isFinite(value) ? value : null,
     rawScale: scale || null,
@@ -115,6 +94,7 @@ export function standardizeGpa(profile = {}) {
     officialGpa: null,
     officialGpaScale: null,
     estimatedGpa4: null,
+    comparablePercent: null,
     backgroundCorrection: null,
     equivalentScore: null,
     confidence: "低",
@@ -124,14 +104,16 @@ export function standardizeGpa(profile = {}) {
     result.notes.push("尚未提供可计算的成绩；请补充成绩单官方均分或 GPA。");
     return result;
   }
-  if (["100", "4", "4.3", "5"].includes(scale)) {
+  if (["4", "4.3", "5"].includes(scale)) {
+    result.officialGpa = value;
+    result.officialGpaScale = scale === "4" ? "4.0" : scale === "4.3" ? "4.3" : "5.0";
+    result.notes.push("没有成绩单上的官方百分制均分时，不把 GPA 按满分比例换算成百分制；只与相同分制的案例原值比较。");
+    return result;
+  }
+  if (scale === "100") {
     const comparablePercent = gpaToComparablePercent(value, scale);
+    result.comparablePercent = comparablePercent;
     result.estimatedGpa4 = estimateFourPointGpa(value);
-    if (["4", "4.3", "5"].includes(scale)) {
-      result.officialGpa = value;
-      result.officialGpaScale = scale === "4" ? "4.0" : scale === "4.3" ? "4.3" : "5.0";
-      result.estimatedGpa4 = null;
-    }
     result.backgroundCorrection = backgroundCorrection(profile);
     if (result.backgroundCorrection && Number.isFinite(comparablePercent)) {
       const correction = result.backgroundCorrection;
@@ -143,9 +125,7 @@ export function standardizeGpa(profile = {}) {
     } else {
       result.notes.push("未识别本科院校层次，不计算985等效均分。");
     }
-    result.notes.push(scale === "100"
-      ? "粗略4.0 GPA仅用于内部比较，不是成绩单官方换算结果。"
-      : "等效百分制仅用于案例位置比较，不是成绩单官方换算结果。");
+    result.notes.push("粗略4.0 GPA仅用于内部比较，不是成绩单官方换算结果。");
     return result;
   }
   result.notes.push("成绩分制未知，不能进行跨分制换算。");
@@ -165,11 +145,12 @@ export function caseGpaInput(item = {}) {
   const percentRange = withoutFractions.match(/(\d{2}(?:\.\d+)?)\s*(?:-|–|—|~|至)\s*(\d{2}(?:\.\d+)?)/);
   const rangePercent = percentRange ? (Number(percentRange[1]) + Number(percentRange[2])) / 2 : null;
   const standaloneNumbers = [...withoutFractions.matchAll(/\d+(?:\.\d+)?/g)].map(match => Number(match[0]));
-  const explicitPercent = validPercent(Number(item.gpa100))
-    ? Number(item.gpa100)
-    : validPercent(rangePercent)
+  const percentDisclosed = /均分|平均分|加权|百分制|%|\d{2}(?:\.\d+)?\s*分(?!制)/.test(raw)
+    || fractions.length > 0 || item.gpaScale === "PERCENT_100";
+  const explicitPercent = !percentDisclosed ? null : validPercent(rangePercent)
       ? rangePercent
-      : standaloneNumbers.find(validPercent);
+      : standaloneNumbers.find(validPercent) ?? (item.gpaScale === "PERCENT_100" && !fractions.some(item => item.denominator !== 100)
+        && validPercent(Number(item.gpa100)) ? Number(item.gpa100) : null);
 
   // Some source pages publish both a percentage average and an official GPA.
   // Prefer the percentage value so one record is never misread as e.g. 86.12/4.0.
@@ -183,7 +164,8 @@ export function caseGpaInput(item = {}) {
   }
 
   const declaredScale = String(item.gpaScale || "UNKNOWN");
-  const values = [...raw.matchAll(/\d+(?:\.\d+)?/g)].map(match => Number(match[0]));
+  const withoutScaleLabels = raw.replace(/(?:4(?:\.0)?|4\.3|5(?:\.0)?)\s*分制/g, " ");
+  const values = [...withoutScaleLabels.matchAll(/\d+(?:\.\d+)?/g)].map(match => Number(match[0]));
   if (declaredScale === "PERCENT_100") {
     const value = values.find(validPercent);
     if (Number.isFinite(value)) return { scale: declaredScale, value };
@@ -194,12 +176,6 @@ export function caseGpaInput(item = {}) {
     if (Number.isFinite(value)) return { scale: declaredScale, value };
   }
 
-  const inferred = values.find(candidate => validGpa(candidate, 5));
-  if (Number.isFinite(inferred)) {
-    if (inferred <= 4) return { scale: "GPA_4", value: inferred };
-    if (inferred <= 4.3) return { scale: "GPA_4_3", value: inferred };
-    return { scale: "GPA_5", value: inferred };
-  }
   return { scale: "UNKNOWN", value: null };
 }
 
@@ -244,12 +220,14 @@ function nearestCase(profile, programme) {
   const cases = programme.cases || [];
   if (!cases.length) return null;
   const scale = profileScale(profile.gpaScale);
-  const value = Number(profile.gpaValue);
+  const value = profile.gpaValue == null || profile.gpaValue === "" ? NaN : Number(profile.gpaValue);
+  const userEquivalent = scale === "PERCENT_100" ? standardizeGpa(profile).equivalentScore?.default : null;
   const languageTest = profile.languageTest || "IELTS";
   return [...cases].sort((a, b) => {
     const tuple = item => {
-      const itemGpa = standardizedCaseGpa(item)?.equivalentScore?.default;
-      const userGpa = standardizeGpa(profile).equivalentScore?.default;
+      const itemGpa = scale === "PERCENT_100" ? standardizedCaseGpa(item)?.equivalentScore?.default
+        : caseScale(item) === scale ? caseGpaValue(item) : null;
+      const userGpa = scale === "PERCENT_100" ? userEquivalent : value;
       const comparableGpa = Number.isFinite(itemGpa) && Number.isFinite(userGpa);
       const comparableLanguage = item.languageTest === languageTest && Number.isFinite(item.language) && Number.isFinite(profile.language);
       return [
@@ -270,6 +248,16 @@ function nearestCase(profile, programme) {
   })[0];
 }
 
+function sameMajor(item, profile) {
+  const applicant = String(profile.majorName || '').trim().toLowerCase().replace(/\s+/g, '');
+  const recorded = String(item.majorName || '').trim().toLowerCase().replace(/\s+/g, '');
+  if (applicant && recorded) {
+    const names = [recorded, ...[...recorded.matchAll(/[（(]([^（）()]+)[）)]/g)].map(match => match[1])];
+    return names.includes(applicant);
+  }
+  return Boolean(item.majorTag && profile.major && item.majorTag === profile.major);
+}
+
 export function analyzeCaseEvidence(profile, programme) {
   const cases = programme.cases || [];
   const referenceYear = referenceYearForCases(cases, profile.applicationYear);
@@ -277,15 +265,21 @@ export function analyzeCaseEvidence(profile, programme) {
     ? Number(item.yearWeight)
     : caseYearWeight(item.offerYear ?? item.cycle, referenceYear);
   const scale = profileScale(profile.gpaScale);
-  const userGpa = Number(profile.gpaValue);
+  const userGpa = profile.gpaValue == null || profile.gpaValue === "" ? NaN : Number(profile.gpaValue);
   const userStandardization = standardizeGpa(profile);
-  const normalizedUserGpa = userStandardization.equivalentScore?.default ?? null;
+  const percentScale = scale === "PERCENT_100";
+  const comparableScale = percentScale ? "985_EQUIVALENT_PERCENT" : ["GPA_4", "GPA_4_3", "GPA_5"].includes(scale) ? scale : null;
+  const normalizedUserGpa = percentScale ? userStandardization.equivalentScore?.default ?? null
+    : comparableScale && Number.isFinite(userGpa) ? userGpa : null;
   const comparableCases = cases
     .map(item => ({ item, raw: caseGpaValue(item), standardization: standardizedCaseGpa(item) }))
-    .map(entry => ({ ...entry, normalized: entry.standardization?.equivalentScore?.default }))
+    .map(entry => ({ ...entry, normalized: percentScale ? entry.standardization?.equivalentScore?.default
+      : comparableScale && caseScale(entry.item) === scale ? entry.raw : null }))
     .filter(entry => Number.isFinite(entry.normalized));
   const userTierLabel = userStandardization.backgroundCorrection?.label;
-  const sameTierCases = comparableCases.filter(({ standardization }) => userTierLabel && standardization.backgroundCorrection?.label === userTierLabel);
+  const sameTierCases = comparableCases.filter(({ item, standardization }) => percentScale
+    ? userTierLabel && standardization.backgroundCorrection?.label === userTierLabel
+    : profile.schoolTier != null && item.schoolTier != null && Number(item.schoolTier) === Number(profile.schoolTier));
   const comparisonCases = sameTierCases.length ? sameTierCases : comparableCases;
   const comparisonValues = comparisonCases.map(entry => entry.normalized);
   const comparisonMedianGpa = comparisonValues.length ? median(comparisonValues) : null;
@@ -301,9 +295,13 @@ export function analyzeCaseEvidence(profile, programme) {
   const weightedLanguageStats = weightedSummary(languageCases.map(item => ({ value: item.language, weight: weightOf(item) })));
   const languageRequirement = languageTest === "IELTS" ? programme.languageMin : null;
   const sameTierCount = sameTierCases.length;
-  const sameMajorCount = cases.filter(item => item.majorTag === profile.major).length;
-  const sameTierMajorCount = cases.filter(item => item.schoolTier === profile.schoolTier && item.majorTag === profile.major).length;
+  const sameMajorCount = cases.filter(item => sameMajor(item, profile)).length;
+  const sameTierMajorCount = sameTierCases.filter(({ item }) => sameMajor(item, profile)).length;
   const gpaAtOrBelowUser = Number.isFinite(normalizedUserGpa) ? comparableCases.filter(entry => entry.normalized <= normalizedUserGpa).length : 0;
+  const gpaInsertionRank = gpaStats && Number.isFinite(normalizedUserGpa)
+    ? 1 + comparableCases.filter(entry => entry.normalized > normalizedUserGpa).length
+    : null;
+  const belowAllComparableCases = gpaInsertionRank != null && gpaInsertionRank > comparableCases.length;
 
   return {
     comparisonMedianGpa: weightedComparisonStats?.weightedMedian ?? null,
@@ -317,31 +315,42 @@ export function analyzeCaseEvidence(profile, programme) {
         sameMajorCount,
         sameTierMajorCount,
         comparableGpaCount: comparableCases.length,
-        gpaPercentileAmongSuccessfulCases: comparableCases.length && Number.isFinite(normalizedUserGpa)
+        gpaPercentileAmongSuccessfulCases: comparableCases.length >= 5 && Number.isFinite(normalizedUserGpa)
           ? round(gpaAtOrBelowUser / comparableCases.length * 100)
           : null
       },
       gpa: {
-        available: Boolean(gpaStats),
-        scale: "985_EQUIVALENT_PERCENT",
+        available: Boolean(gpaStats && Number.isFinite(normalizedUserGpa)),
+        scale: comparableScale,
         ...(gpaStats || { min: null, max: null, mean: null, median: null }),
         ...(weightedGpaStats || { weightedMean: null, weightedMedian: null, totalWeight: 0 }),
         referenceYear,
         user: Number.isFinite(normalizedUserGpa) ? normalizedUserGpa : null,
         rawUser: Number.isFinite(userGpa) ? userGpa : null,
-        rank: gpaStats && Number.isFinite(normalizedUserGpa) ? 1 + comparableCases.filter(entry => entry.normalized > normalizedUserGpa).length : null,
+        rank: comparableCases.length < 5 || belowAllComparableCases ? null : gpaInsertionRank,
         total: comparableCases.length,
+        positionNote: comparableCases.length > 0 && comparableCases.length < 5
+          ? `仅 ${comparableCases.length} 条同分制可比成功案例，不展示 GPA 名次；个别成功样本不能证明成绩优势、劣势或录取门槛。`
+          : belowAllComparableCases
+          ? `低于全部 ${comparableCases.length} 条同分制可比成功案例；案例最低分不是官方录取门槛。`
+          : gpaInsertionRank === comparableCases.length
+          ? `插入 ${comparableCases.length} 条成功案例后约在第 ${gpaInsertionRank} 位（共有 ${comparableCases.length + 1} 个位置）；这不是现有案例中的名次，申请人成绩并非低于全部案例。`
+          : null,
         sameTier: sameTierStats ? { ...sameTierStats, ...(weightedSameTierStats || {}) } : null,
         sameTierCount: sameTierCases.length,
         groups: groupGpas(cases),
         normalization: {
           applied: Boolean(userStandardization.equivalentScore),
-          baseline: "985本科",
+          baseline: percentScale ? "985本科" : null,
           comparableCount: comparableCases.length,
           excludedCount: cases.filter(item => Number.isFinite(caseGpaValue(item))).length - comparableCases.length,
-          note: "已先将百分制、4分制和5分制映射为内部比较分，再按本科院校层次校正到985本科基准。"
+          note: percentScale
+            ? "只使用已披露的百分制均分，按本科院校层次校正到985本科基准；其他GPA分制不参与换算。"
+            : "只比较相同分制的原始GPA；未换算为百分制，也未做985基准校正。"
         },
-        note: gpaStats ? null : "没有可识别分制且可校正的审核案例，无法生成统一GPA分布。"
+        note: gpaStats && Number.isFinite(normalizedUserGpa) ? null
+          : percentScale ? "没有可比较的百分制审核案例或无法计算院校基准分，不显示GPA位置。"
+          : "没有相同分制的审核案例，不把GPA换算成百分制来制造比较。"
       },
       language: {
         available: Boolean(languageStats),

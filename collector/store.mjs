@@ -7,7 +7,7 @@ import { resolveReferenceInstitution } from "./reference-store.mjs";
 import { programmeSources, programmes as programmeProfiles } from "../data.mjs";
 
 const collectorRoot = dirname(fileURLToPath(import.meta.url));
-export const defaultDbPath = resolve(collectorRoot, "data", "cases.sqlite");
+export const defaultDbPath = resolve(process.env.ADMISSION_DATA_DIR || resolve(collectorRoot, "data"), "cases.sqlite");
 
 export function openCaseStore(dbPath = defaultDbPath) {
   if (dbPath !== ":memory:") mkdirSync(dirname(dbPath), { recursive: true });

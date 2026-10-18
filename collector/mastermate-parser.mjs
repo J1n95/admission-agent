@@ -26,7 +26,7 @@ function convertGpa(raw, scaleHint = null) {
   return {
     gpaRaw: value,
     gpaScale: denominator === 100 ? "PERCENT_100" : `GPA_${denominator}`,
-    gpa100: score / denominator * 100
+    gpa100: denominator === 100 ? score : null
   };
 }
 

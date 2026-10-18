@@ -1,12 +1,14 @@
 {
   "name": "admission-reference-prototype",
-  "version": "0.1.0",
+  "version": "0.1.13",
+  "description": "港新硕士申请分析桌面版",
   "private": true,
   "type": "module",
+  "main": "desktop/main.mjs",
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
-    "test": "node master-data.test.mjs && node case-analysis.test.mjs && node analysis-service.test.mjs && node assessment-contract.test.mjs && node knowledge-base.test.mjs && node collector/experience-classifier.test.mjs && node collector/vector-search.test.mjs && node collector/mastermate-parser.test.mjs && node collector/agent.test.mjs && node collector/store.test.mjs && node collector/analysis.test.mjs && node collector/reference-store.test.mjs && node collector/review-engine.test.mjs && node collector/review-agent.test.mjs && node collector/discover-hksg.test.mjs && node collector/discover-programmes.test.mjs",
+    "test": "node master-data.test.mjs && node case-analysis.test.mjs && node display-evidence.test.mjs && node analysis-service.test.mjs && node assessment-contract.test.mjs && node knowledge-base.test.mjs && node collector/experience-classifier.test.mjs && node collector/vector-search.test.mjs && node collector/mastermate-parser.test.mjs && node collector/agent.test.mjs && node collector/store.test.mjs && node collector/analysis.test.mjs && node collector/reference-store.test.mjs && node collector/review-engine.test.mjs && node collector/review-agent.test.mjs && node collector/discover-hksg.test.mjs && node collector/discover-programmes.test.mjs",
     "collector:status": "node collector/agent.mjs status",
     "collector:review-report": "node collector/review-report.mjs",
     "collector:dedupe": "node collector/dedupe-existing.mjs",
@@ -34,6 +36,64 @@
     "reference:index": "node collector/build-ror-index.mjs",
     "reference:moe:export": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File work/export-moe-xls.ps1",
     "reference:moe:index": "node collector/build-moe-index.mjs",
-    "collector:build-embeddings": "node collector/build-case-embeddings.mjs"
+    "collector:build-embeddings": "node collector/build-case-embeddings.mjs",
+    "desktop:seed": "node scripts/build-desktop-seed.mjs",
+    "desktop:build": "npm run desktop:seed && electron-builder --win zip",
+    "eval:guardrails": "node eval/reliability.test.mjs",
+    "eval:model-ab": "node eval/model-ab.mjs",
+    "eval:model-ab:test": "node --test eval/model-ab.test.mjs",
+    "eval:deepseek-review": "electron scripts/run-deepseek-review.mjs",
+    "eval:cross-discipline": "electron scripts/run-deepseek-review.mjs --cross-discipline",
+    "eval:cross-discipline-expanded": "electron scripts/run-deepseek-review.mjs --cross-discipline-expanded",
+    "eval:gpa-five-review": "electron scripts/run-deepseek-review.mjs --gpa-five-review",
+    "desktop:test": "npm run desktop:seed && node comparison.test.mjs && node desktop/legacy-analysis.test.mjs && node desktop/security.test.mjs && node desktop/collector-integration.test.mjs && node miniprogram/cloudfunctions/admissionApi/agent/runtime.test.mjs && npm run eval:guardrails"
+  },
+  "devDependencies": {
+    "electron": "^38.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.admissionreference.desktop",
+    "productName": "录取参照",
+    "asar": true,
+    "electronDist": "node_modules/electron/dist",
+    "electronLanguages": ["en-US", "zh-CN"],
+    "directories": { "output": "release" },
+    "files": [
+      "server.mjs", "app.mjs", "comparison.mjs", "display-evidence.mjs", "index.html", "styles.css", "favicon.svg",
+      "review.html", "review.mjs", "review.css",
+      "eval/model-ab.mjs",
+      "analysis-service.mjs",
+      "assessment-contract.mjs", "case-analysis.mjs", "knowledge-base.mjs", "data.mjs",
+      "master-data.mjs", "major-master.mjs", "collector/**/*.mjs", "collector/prompts/*.txt", "prompts/*.txt",
+      "desktop/**", "!**/*.test.mjs", "!collector/data/**",
+      "miniprogram/cloudfunctions/admissionApi/package.json",
+      "miniprogram/cloudfunctions/admissionApi/logic.js",
+      "miniprogram/cloudfunctions/admissionApi/catalog.json",
+      "miniprogram/cloudfunctions/admissionApi/agent/runtime.mjs",
+      "miniprogram/cloudfunctions/admissionApi/agent/case-analysis.mjs",
+      "miniprogram/cloudfunctions/admissionApi/agent/assessment-contract.mjs",
+      "miniprogram/cloudfunctions/admissionApi/agent/assessment-system.txt",
+      "miniprogram/cloudfunctions/admissionApi/agent/project-screening-system.txt",
+      "miniprogram/cloudfunctions/admissionApi/agent/probability-calibration-system.txt",
+      "!work/**", "!outputs/**", "!.env*"
+    ],
+    "extraResources": [
+      { "from": "build/desktop-seed/cases-seed.sqlite", "to": "data/cases-seed.sqlite" },
+      { "from": "build/desktop-seed/institutions.sqlite", "to": "data/institutions.sqlite" },
+      { "from": "build/desktop-seed/cases.jsonl", "to": "data/agent/cases.jsonl" },
+      { "from": "build/desktop-seed/programmes.jsonl", "to": "data/agent/programmes.jsonl" },
+      { "from": "build/desktop-seed/programme-evidence.jsonl", "to": "data/agent/programme-evidence.jsonl" },
+      { "from": "build/desktop-seed/catalog.json", "to": "data/agent/catalog.json" },
+      { "from": "collector/sources.json", "to": "data/collector/sources.json" },
+      { "from": "collector/data/programme-catalogue.json", "to": "data/collector/programme-catalogue.json" },
+      { "from": "collector/data/programme-alias-map.json", "to": "data/collector/programme-alias-map.json" },
+      { "from": "collector/data/programme-status-overrides.json", "to": "data/collector/programme-status-overrides.json" }
+    ],
+    "win": {
+      "target": ["zip"],
+      "signAndEditExecutable": false,
+      "artifactName": "录取参照-Windows-${version}-${arch}.${ext}"
+    }
   }
 }

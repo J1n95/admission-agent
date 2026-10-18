@@ -19,6 +19,16 @@ assert.ok(filtered, "A supported evidence item should keep the assessment");
 assert.deepEqual(filtered.evidenceUsed.map(item => item.documentId), ["cuhk-ee:case:approved"]);
 assert.deepEqual(filtered.reasoning, ["[cuhk-ee:case:approved] IELTS 可直接比较。"]);
 
+const tolerated = normalizeAssessment({ ...base, reasoning: [
+  "cuhk-ee:case:approved IELTS 可直接比较。",
+  "[cuhk-ee:case:approved:language] IELTS 可直接比较。",
+  "not-allowed IELTS 不可引用。"
+] }, allowed, comparison);
+assert.deepEqual(tolerated.reasoning, [
+  "[cuhk-ee:case:approved] IELTS 可直接比较。",
+  "[cuhk-ee:case:approved] IELTS 可直接比较。"
+]);
+
 const missingGpa = normalizeAssessment({
   ...base,
   reasoning: ["[cuhk-ee:case:approved] GPA 分制未知，无法比较。"],
