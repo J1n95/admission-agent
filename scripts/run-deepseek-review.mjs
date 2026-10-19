@@ -23,6 +23,7 @@ async function run() {
   const gpaCompare = process.argv.includes("--gpa-compare");
   const schoolTierSmoke = process.argv.includes("--school-tier-smoke");
   const nonEliteSweep = process.argv.includes("--non-elite-sweep");
+  const fullFlowSmoke = process.argv.includes("--full-flow-smoke");
   const settingsPath = join(app.getPath("userData"), "settings.json");
   const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
   const configuration = settings.experiment?.deepseek;
@@ -31,6 +32,10 @@ async function run() {
   const childArgs = collectorSmoke
     ? [join(root, "collector", "agent.mjs"), "collect", "https://www.mastermate.cn/admission/9576",
       "--programme-id=cuhk-master-of-laws-in-energy-and-environmental-law", "--dry-run", "--force-refresh"]
+    : fullFlowSmoke
+      ? [join(root, "eval", "full-flow-smoke.mjs"),
+        ...(process.argv.includes("--issue1") ? ["--issue1"] : []),
+        ...(process.argv.includes("--issue2") ? ["--issue2"] : [])]
     : [join(root, "eval", "model-ab.mjs"), "--run",
       nonEliteSweep ? "--non-elite-sweep" : schoolTierSmoke ? "--school-tier-smoke" : gpaCompare ? "--gpa-compare" : gpaFiveReview ? "--gpa-five-review" : expandedDiscipline ? "--cross-discipline-expanded" : crossDiscipline ? "--cross-discipline" : "--deepseek-review",
       nonEliteSweep ? "--max-cny=5" : gpaCompare || crossDiscipline || expandedDiscipline ? "--max-cny=2" : "--max-cny=1"];
@@ -45,6 +50,12 @@ async function run() {
       DEEPSEEK_API_URL: configuration.apiUrl,
       DEEPSEEK_MODEL: configuration.model,
       ADMISSION_EVAL_OUTPUT_DIR: outputDir,
+      FULL_FLOW_MAX_CNY: "5",
+      ...(fullFlowSmoke ? {
+        AI_API_URL: configuration.apiUrl,
+        AI_API_KEY: apiKey,
+        AI_MODEL: configuration.model
+      } : {}),
       ...(collectorSmoke ? {
         ADMISSION_DATA_DIR: join(root, "work", "collector-smoke-gpa-2026-10-18"),
         COLLECTOR_AI_API_URL: configuration.apiUrl,

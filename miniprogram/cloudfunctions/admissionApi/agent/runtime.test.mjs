@@ -35,6 +35,8 @@ for (const relative of [
 assert.ok(assessmentPrompt.includes('evidenceSelection'));
 assert.ok(assessmentPrompt.includes('comparisonProgrammes'));
 assert.ok(readFileSync(join(here, 'probability-calibration-system.txt'), 'utf8').includes('0 条案例仍必须'));
+assert.ok(screeningPrompt.includes('工业/产品设计不等于时尚设计、建筑设计或创意媒体'));
+assert.ok(screeningPrompt.includes('新闻学/传播学不等于影视、交互艺术或创意媒体制作'));
 assert.ok(screeningPrompt.includes('selectedProgrammeIds'));
 
 const readJsonLines = name => readFileSync(join(repoRoot, 'miniprogram', 'cloud-data', name), 'utf8')
@@ -226,6 +228,7 @@ const mergedZero = mergeProbabilityCalibration(zeroAssessment, zeroCalibration, 
 assert.equal(mergedZero.center, 41);
 assert.equal(mergedZero.confidence, 'low');
 assert.equal(mergedZero.evidenceMode, 'ai-project-profile-only');
+assert.equal(mergedZero.displayMode, 'range-only');
 assert.ok(mergedZero.high - mergedZero.low >= 45);
 assert.ok(mergedZero.uncertainties.some(item => item.includes('没有公开成功案例')));
 

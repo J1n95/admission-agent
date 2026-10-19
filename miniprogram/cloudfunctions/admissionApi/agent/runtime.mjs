@@ -605,6 +605,7 @@ export function mergeProbabilityCalibration(assessments, calibration, prepared) 
       }),
       confidence: calibrated?.confidence || (caseCount < 5 ? 'low' : 'medium'),
       evidenceMode,
+      displayMode: caseCount < 5 ? 'range-only' : 'point-and-range',
       uncertainties: [...new Set([...(assessment.uncertainties || []), uncertainty, academicUncertainty].filter(Boolean))]
     }];
   }));

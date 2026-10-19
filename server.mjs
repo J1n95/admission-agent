@@ -907,7 +907,7 @@ async function analyze(request, response) {
           projects: buildProgrammeScreeningProjects(fullScreeningContext.retrieved, { fullEvidence: true, programmeIds: uncertainIds })
         });
       } catch (error) {
-        fullScreeningError = error.message || "椤圭洰璇︾粏璧勬枡澶嶆牳妯″瀷璋冪敤澶辫触";
+        fullScreeningError = error.message || "项目详细资料复核模型调用失败";
       }
     }
     const limitedScreening = limitProgrammeScreening(

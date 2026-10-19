@@ -2,7 +2,7 @@ import { courseGroups, programmes, schools } from "./data.mjs";
 import { analyzeAll, standardizeGpa } from "./case-analysis.mjs";
 import { majorMaster } from "./major-master.mjs";
 import { buildComparison } from "./comparison.mjs";
-import { readableEvidenceIds } from "./display-evidence.mjs";
+import { modelReferencePresentation, readableEvidenceIds } from "./display-evidence.mjs";
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -788,12 +788,13 @@ function renderResults(profile, results = analyzeAll(profile, filteredProgrammes
   $("#comparison-summary").innerHTML = `
     <h2>数值依据</h2>
     <p>你的申请资料 + 本地项目资料（部分项目仅有目录信息或未核验推断）+ 本地审核成功案例统计及最多 6 条代表案例，由你配置的模型综合分析。本次分析不会实时浏览学校官网。</p>
-    <p>${comparison.total ? `已有 ${comparison.total} 个项目获得模型参考值，${latestCalibrationValid ? '按模型横向排序展示（仅通过格式与部分证据边界检查）' : '仅按单项目估计值从高到低展示，横向排序未通过校验'}；无数值项目置于末尾。` : "本次没有项目获得通过校验的模型参考值。"}百分比未经成功与失败样本校准，不是真实录取率。</p>`;
+    <p>${comparison.total ? `已有 ${comparison.total} 个项目获得模型参考值，${latestCalibrationValid ? '按模型横向排序展示（仅通过格式与部分证据边界检查）' : '仅按单项目估计值从高到低展示，横向排序未通过校验'}；无数值项目置于末尾。少于 5 条公开成功案例的项目只显示宽区间，内部中心值仅用于排序。` : "本次没有项目获得通过校验的模型参考值。"}百分比未经成功与失败样本校准，不是真实录取率。</p>`;
 
   $("#results-list").innerHTML = latestResults.map(({ programme, result, assessmentError }, index) => {
     const position = comparison.byId.get(programme.id);
-    const hasAssessment = Boolean(position);
     const caseCount = Number(programme.caseCount ?? result.evidence?.caseCount ?? programme.cases?.length ?? 0);
+    const reference = modelReferencePresentation(result, caseCount);
+    const hasAssessment = Boolean(position) && reference.available;
     const evidenceLabel = caseCount === 0 ? "没有公开案例，判断依据有限" : caseCount < 5
       ? `仅 ${caseCount} 条成功案例，判断依据有限` : `${caseCount} 条公开成功案例`;
     const fitClue = insights[programme.id]?.fit?.find(item => typeof item === "string" && item.trim());
@@ -806,11 +807,11 @@ function renderResults(profile, results = analyzeAll(profile, filteredProgrammes
           <p>${escapeHtml(programme.name)}</p>
         </div>
         <div class="probability">
-          <span>模型机会参考 · 未经统计校准</span>
-          <strong>${hasAssessment ? `${result.center}%` : "暂无数值"}</strong>
-          ${hasAssessment ? `<span>参考范围 ${result.low}%–${result.high}% · ${latestCalibrationValid && position.total > 1 ? `相对第 ${position.rank}/${position.total}` : position.total > 1 ? '横向排序未通过校验' : "仅 1 个项目，无法排序"}</span>` : ""}
+          <span>${reference.label}</span>
+          <strong>${reference.value}</strong>
+          ${hasAssessment ? `<span>${reference.intervalOnly ? "中心值仅用于内部排序" : `参考范围 ${result.low}%–${result.high}%`} · ${latestCalibrationValid && position.total > 1 ? `相对第 ${position.rank}/${position.total}` : position.total > 1 ? '横向排序未通过校验' : "仅 1 个项目，无法排序"}</span>` : ""}
           <em>${evidenceLabel}</em>
-          <p class="experimental-value">${hasAssessment ? "模型估计，非真实录取率；请核对官方申请条件。" : escapeHtml(assessmentFailureText(assessmentError))}</p>
+          <p class="experimental-value">${hasAssessment ? reference.intervalOnly ? "案例不足 5 条，不展示单点值；区间仍是未经校准的模型参考。" : "模型估计，非真实录取率；请核对官方申请条件。" : escapeHtml(assessmentFailureText(assessmentError))}</p>
           ${hasAssessment && fitClue ? `<p class="result-rationale">匹配线索：${escapeHtml(readableEvidenceIds(fitClue))}</p>` : ""}
         </div>
       </header>
@@ -931,10 +932,17 @@ function downloadReport() {
     const insight = personalizedInsights.insights?.[programme.id] || {};
     const sources = new Map((insight.reviewEvidence || []).map(item => [String(item.id), item]));
     const show = value => readableEvidenceIds(value);
+    const caseCount = Number(programme.caseCount ?? result.evidence?.caseCount ?? programme.cases?.length ?? 0);
+    const reference = modelReferencePresentation(result, caseCount);
+    const rankText = latestCalibrationValid && comparison.total > 1
+      ? `相对第 ${comparison.byId.get(programme.id)?.rank}/${comparison.total}`
+      : comparison.total > 1 ? "横向排序未通过校验，仅按单项目估计值展示" : "仅1个项目，无法排序";
     return {
       project: `${programme.university} ${programme.nameZh}`,
       assessment: comparison.byId.has(programme.id)
-        ? `模型参考值 ${result.center}%（范围 ${result.low}%–${result.high}%；${latestCalibrationValid && comparison.total > 1 ? `相对第 ${comparison.byId.get(programme.id).rank}/${comparison.total}` : comparison.total > 1 ? '横向排序未通过校验，仅按单项目估计值展示' : "仅1个项目，无法排序"}；未经校准，非真实录取率）`
+        ? reference.intervalOnly
+          ? `模型区间参考 ${reference.value}（${caseCount === 0 ? "没有公开成功案例" : `仅 ${caseCount} 条公开成功案例`}，不显示单点值；${rankText}；未经校准，非真实录取率）`
+          : `模型参考值 ${reference.value}（范围 ${result.low}%–${result.high}%；${rankText}；未经校准，非真实录取率）`
         : `未生成模型数值：${assessmentFailureText(assessmentError)}`,
       fit: insight.fit?.map(show).join("；") || "个性化分析API未生成",
       psCv: insight.psCv?.map(show).join("；") || "个性化分析API未生成",
