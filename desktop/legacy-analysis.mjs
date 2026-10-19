@@ -7,6 +7,7 @@ import * as agent from "../miniprogram/cloudfunctions/admissionApi/agent/runtime
 import { standardizeGpa } from "../miniprogram/cloudfunctions/admissionApi/agent/case-analysis.mjs";
 import { normalizeAssessment } from "../miniprogram/cloudfunctions/admissionApi/agent/assessment-contract.mjs";
 import { resolveExactInstitution } from "../master-data.mjs";
+import { resolveReferenceInstitution } from "../collector/reference-store.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagedData = Boolean(process.env.ADMISSION_AGENT_DATA_DIR);
@@ -341,7 +342,8 @@ export function displayProgramme(programme, cases, evidenceRows = []) {
 export async function analyzeWithLegacyAgent(payload = {}) {
   refreshApprovedCases();
   const submittedProfile = payload.profile || {};
-  const verifiedInstitution = resolveExactInstitution(submittedProfile.university);
+  const verifiedInstitution = resolveExactInstitution(submittedProfile.university)
+    || resolveReferenceInstitution(submittedProfile.university);
   const profile = verifiedInstitution ? {
     ...submittedProfile,
     schoolTier: verifiedInstitution.scoreTier,

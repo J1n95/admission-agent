@@ -29,6 +29,12 @@ assert.ok(schools.some(item => item.classification === "海外本科"), "The sch
 assert.deepEqual(estimateFourPointGpa(85), { min: 3.3, max: 3.7, label: "3.3–3.7" }, "Percent scores must use a rough GPA interval");
 const standardized211 = standardizeGpa({ gpaScale: "100", gpaValue: 86, schoolTier: 2, schoolClassification: "211 / 双一流" });
 assert.deepEqual(standardized211.equivalentScore, { min: 84, max: 85, default: 84.5 }, "211 background correction must preserve an equivalent-score range");
+assert.deepEqual(standardizeGpa({ gpaScale: "100", gpaValue: 84, schoolClassification: "民办本科" }).equivalentScore,
+  { min: 79, max: 80.5, default: 79.8 }, "A verified private college uses its own labeled heuristic instead of the ordinary public tier");
+assert.equal(standardizeGpa({ gpaScale: "100", gpaValue: 84, schoolClassification: "合作办学本科（未设统一院校层级）" }).equivalentScore,
+  null, "Cooperative colleges must not inherit an unsupported unified score correction");
+assert.deepEqual(analyzeCaseEvidence({ ...profile, schoolTier: 1, schoolClassification: "双非", gpaValue: 84 }, programme)
+  .evidence.gpa.normalization.userRange, { min: 80, max: 81.5 }, "The report must expose the heuristic range behind its comparison point");
 for (const standardize of [standardizeGpa, profile => analyzeMiniProgramCaseEvidence(profile, { cases: [] }).evidence.gpa]) {
   const result = standardize({ university: "成都理工大学", schoolClassification: "待主表分类", gpaScale: "100", gpaValue: 82 });
   assert.equal(result.equivalentScore?.default ?? result.user, 80, "A verified non-211 Double First-Class school must not be treated as an ordinary unknown school");

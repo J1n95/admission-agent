@@ -6,7 +6,7 @@ import { extname, join, normalize } from "node:path";
 import { knowledgeStatus } from "./knowledge-base.mjs";
 import { buildAnalysisContext, buildProgrammeScreeningContext, buildProgrammeScreeningProjects, ensureProgrammeScreeningRecall, limitProgrammeScreening, mergeProgrammeScreening, normalizeProgrammeScreening, selectAssessmentEvidence } from "./analysis-service.mjs";
 import { normalizeAssessment } from "./assessment-contract.mjs";
-import { searchInstitutions } from "./collector/reference-store.mjs";
+import { resolveReferenceInstitution, searchInstitutions } from "./collector/reference-store.mjs";
 import { completeAnalysisRecord, createAnalysisRecord, listAgentRuns, listAnalysisRecords, listCasesByStatus, listCaseEmbeddings, listMasterData, openCaseStore, getProgrammeScope, getProgrammeStatus, reviewCase, saveAnalysisFeedback, storeStatus, updateCaseFields } from "./collector/store.mjs";
 import { triageRows } from "./collector/review-engine.mjs";
 import { isCorroboratedReview, normalizeReviewDecision, reviewInput } from "./collector/review-agent.mjs";
@@ -843,11 +843,12 @@ async function analyze(request, response) {
       ? ["integrated-circuit"]
       : [];
     const requestedFields = [...new Set([...(input.fields || []), ...impliedFields])];
-    const institution = resolveExactInstitution(input.profile?.university);
-    if (institution?.scoreTier != null) input.profile = {
+    const institution = resolveExactInstitution(input.profile?.university)
+      || resolveReferenceInstitution(input.profile?.university);
+    if (institution) input.profile = {
       ...input.profile,
       schoolTier: institution.scoreTier,
-      schoolClassification: institution.classification || input.profile?.schoolClassification || null
+      schoolClassification: institution.classification || null
     };
     input.profile = { ...(input.profile || {}), gpaStandardization: standardizeGpa(input.profile || {}) };
     const modelProfile = { structured: input.profile || {}, narrative: input.profileText || null };

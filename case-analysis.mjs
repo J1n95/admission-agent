@@ -344,10 +344,13 @@ export function analyzeCaseEvidence(profile, programme) {
         normalization: {
           applied: Boolean(userStandardization.equivalentScore),
           baseline: percentScale ? "985本科" : null,
+          userRange: userStandardization.equivalentScore
+            ? { min: userStandardization.equivalentScore.min, max: userStandardization.equivalentScore.max }
+            : null,
           comparableCount: comparableCases.length,
           excludedCount: cases.filter(item => Number.isFinite(caseGpaValue(item))).length - comparableCases.length,
           note: percentScale
-            ? "只使用已披露的百分制均分，按本科院校层次校正到985本科基准；其他GPA分制不参与换算。"
+            ? "只使用已披露的百分制均分，按未经录取结果校准的院校层级假设计算985基准比较分；这不是官方换算，其他GPA分制不参与换算。"
             : "只比较相同分制的原始GPA；未换算为百分制，也未做985基准校正。"
         },
         note: gpaStats && Number.isFinite(normalizedUserGpa) ? null

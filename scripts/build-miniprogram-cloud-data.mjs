@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { institutionMaster, programmeMaster } from '../master-data.mjs';
+import { classifyMoeInstitution } from '../verified-school-tiers.mjs';
 import { majorMaster } from '../major-master.mjs';
 import { programmes as seededProgrammes } from '../data.mjs';
 
@@ -55,19 +56,20 @@ const referenceDb = new DatabaseSync(resolve(root, 'collector/data/reference/ins
 const masterByName = new Map(institutionMaster.flatMap(item => [item.nameZh, item.nameEn, ...(item.aliases || [])]
   .filter(Boolean).map(name => [normalize(name), item])));
 const domestic = referenceDb.prepare(`
-  SELECT institution_code AS id, name, city
+  SELECT institution_code AS id, name, city, education_level, note
   FROM moe_institutions
   WHERE education_level = '本科'
   ORDER BY name
 `).all().map(row => {
   const master = masterByName.get(normalize(row.name));
+  const tier = classifyMoeInstitution(row.name, row.education_level, row.note);
   return {
     id: `moe:${row.id}`,
     nameZh: row.name,
     nameEn: master?.nameEn || '',
     aliases: master?.aliases || [],
-    classification: master?.classification || '普通本科',
-    scoreTier: master?.scoreTier ?? 1,
+    classification: master?.classification || tier.classification,
+    scoreTier: master?.scoreTier ?? tier.scoreTier,
     city: row.city || ''
   };
 });
@@ -151,8 +153,8 @@ const output = resolve(root, 'miniprogram/cloudfunctions/admissionApi/catalog.js
 mkdirSync(dirname(output), { recursive: true });
 writeFileSync(output, JSON.stringify({ institutions, majors, programmes }));
 
-const institutionById = new Map(institutionMaster.map(item => [item.id, item]));
-const institutionByName = new Map(institutionMaster.flatMap(item => [item.nameZh, item.nameEn, ...(item.aliases || [])]
+const institutionById = new Map(institutions.map(item => [item.id, item]));
+const institutionByName = new Map(institutions.flatMap(item => [item.nameZh, item.nameEn, ...(item.aliases || [])]
   .filter(Boolean).map(name => [normalize(name), item])));
 const majorByName = new Map(majorMaster.flatMap(item => [item.name, ...(item.aliases || [])]
   .filter(Boolean).map(name => [normalize(name), item])));

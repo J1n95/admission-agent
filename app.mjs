@@ -584,6 +584,9 @@ function gpaEvidence(result) {
         <div class="is-user"><dt>你的${percent ? "比较分" : "GPA"}</dt><dd>${formatNumber(stats.user)}</dd></div>
       </dl>
       <p>${positionText}</p><p>${sameTier}</p>
+      ${percent && Number.isFinite(stats.rawUser) && stats.normalization?.userRange
+        ? `<p>原始均分 ${formatNumber(stats.rawUser)}；内部比较范围 ${formatNumber(stats.normalization.userRange.min)}–${formatNumber(stats.normalization.userRange.max)}，图中点位为其中的 ${formatNumber(stats.user)}。此范围未经真实录取结果校准。</p>`
+        : ""}
       <p>${escapeHtml(stats.normalization?.note || "")}</p>
     </div>
   `;

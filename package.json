@@ -1,6 +1,6 @@
 {
   "name": "admission-reference-prototype",
-  "version": "0.1.18",
+  "version": "0.1.20",
   "description": "港新硕士申请分析桌面版",
   "private": true,
   "type": "module",
@@ -65,7 +65,7 @@
       "eval/model-ab.mjs",
       "analysis-service.mjs",
       "assessment-contract.mjs", "case-analysis.mjs", "verified-double-first-class.mjs", "knowledge-base.mjs", "data.mjs",
-      "master-data.mjs", "major-master.mjs", "collector/**/*.mjs", "collector/prompts/*.txt", "prompts/*.txt",
+      "master-data.mjs", "major-master.mjs", "verified-school-tiers.mjs", "collector/**/*.mjs", "collector/prompts/*.txt", "prompts/*.txt",
       "desktop/**", "!**/*.test.mjs", "!collector/data/**",
       "miniprogram/cloudfunctions/admissionApi/package.json",
       "miniprogram/cloudfunctions/admissionApi/logic.js",

@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { institutionMaster, normalizeMasterName } from "../master-data.mjs";
+import { classifyMoeInstitution } from "../verified-school-tiers.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
 export const referenceDbPath = resolve(process.env.ADMISSION_REFERENCE_DB_PATH || resolve(root, "data", "reference", "institutions.sqlite"));
@@ -23,21 +24,24 @@ function masterResult(item) {
   };
 }
 
+function moeResult(row) {
+  return {
+    id: `moe:${row.institution_code}`,
+    nameZh: row.name,
+    nameEn: null,
+    ...classifyMoeInstitution(row.name, row.education_level, row.note),
+    countryRegion: row.city,
+    authority: row.authority,
+    educationLevel: row.education_level,
+    note: row.note,
+    source: "MOE"
+  };
+}
+
 function moeResults(db, raw, limit) {
   try {
     return db.prepare(`SELECT institution_code, name, authority, city, education_level, note
-      FROM moe_institutions WHERE name LIKE ? LIMIT ?`).all(`%${escapeLike(raw)}%`, limit).map(row => ({
-      id: `moe:${row.institution_code}`,
-      nameZh: row.name,
-      nameEn: null,
-      classification: null,
-      scoreTier: null,
-      countryRegion: row.city,
-      authority: row.authority,
-      educationLevel: row.education_level,
-      note: row.note,
-      source: "MOE"
-    }));
+      FROM moe_institutions WHERE name LIKE ? LIMIT ?`).all(`%${escapeLike(raw)}%`, limit).map(moeResult);
   } catch (error) {
     // The MOE table is an optional second-stage index; old ROR-only databases remain valid.
     if (error?.code === "SQLITE_ERROR") return [];
@@ -111,18 +115,7 @@ export function resolveReferenceInstitution(name, dbPath = referenceDbPath) {
     try {
       const row = db.prepare(`SELECT institution_code, name, authority, city, education_level, note
         FROM moe_institutions WHERE name = ? COLLATE NOCASE LIMIT 1`).get(raw);
-      if (row) return {
-        id: `moe:${row.institution_code}`,
-        nameZh: row.name,
-        nameEn: null,
-        classification: null,
-        scoreTier: null,
-        countryRegion: row.city,
-        authority: row.authority,
-        educationLevel: row.education_level,
-        note: row.note,
-        source: "MOE"
-      };
+      if (row) return moeResult(row);
     } catch (error) {
       if (error?.code !== "SQLITE_ERROR" && !/no such table/i.test(error?.message || "")) throw error;
     }
