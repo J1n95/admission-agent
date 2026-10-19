@@ -1,6 +1,6 @@
 {
   "name": "admission-reference-prototype",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "港新硕士申请分析桌面版",
   "private": true,
   "type": "module",

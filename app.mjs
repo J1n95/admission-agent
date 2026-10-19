@@ -912,7 +912,10 @@ async function runAnalysis(profile) {
     analysisNote = data.message || "已完成项目与案例检索，并由AI基于检索证据生成项目判断。结果不代表学校承诺。";
   } catch (error) {
     latestAnalysisId = null;
-    analysisNote = `分析未完成：${error.message}。本页只展示项目资料和案例分布，不生成模型数值。`;
+    const failure = /timeout|timed out|aborted due to timeout/i.test(String(error?.message || ""))
+      ? "模型请求超时，请稍后重新分析"
+      : error.message;
+    analysisNote = `分析未完成：${failure}。本页只展示项目资料和案例分布，不生成模型数值。`;
     $("#processing-note").textContent = analysisNote;
   }
 

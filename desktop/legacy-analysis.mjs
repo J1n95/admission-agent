@@ -116,6 +116,7 @@ export function citedEvidenceSnapshots(selection = [], evidenceUsed = []) {
   }));
 }
 const clampTimeout = (value, fallback, minimum, maximum) => Math.min(maximum, Math.max(minimum, Number(value) || fallback));
+export const resolveScreeningTimeout = value => clampTimeout(value, 30000, 15000, 45000);
 
 export async function runWithConcurrency(items, limit, task) {
   const values = new Array(items.length);
@@ -160,7 +161,9 @@ async function requestAgent(prompt, input, timeoutMs = 60000, thinking = "disabl
       signal: AbortSignal.timeout(timeoutMs)
     });
   } catch (error) {
-    if (error?.name === "TimeoutError" || error?.name === "AbortError") throw new Error("模型接口请求超时。");
+    if (error?.name === "TimeoutError" || error?.name === "AbortError" || /timeout|timed out|aborted due to timeout/i.test(String(error?.message || ""))) {
+      throw new Error("模型接口请求超时。");
+    }
     throw new Error("模型接口连接失败，请检查网络和 API 地址。");
   }
 
@@ -175,7 +178,7 @@ async function requestAgent(prompt, input, timeoutMs = 60000, thinking = "disabl
 }
 
 async function runProjectScreening(profile, payload, candidates, fullEvidenceByProgramme = null) {
-  const timeoutMs = clampTimeout(process.env.SCREENING_AI_TIMEOUT_MS, 10000, 5000, 12000);
+  const timeoutMs = resolveScreeningTimeout(process.env.SCREENING_AI_TIMEOUT_MS);
   const projects = agent.buildScreeningProjects(candidates, fullEvidenceByProgramme);
   if (!projects.length) throw new Error("第一层候选项目卡片为空");
   const chunks = [];

@@ -9,8 +9,10 @@ const runId = new Date().toISOString().replaceAll(":", "-").replaceAll(".", "-")
 const runDir = join(outputRoot, `full-flow-${runId}`);
 const dataDir = join(runDir, "data");
 const maximumCny = Number(process.env.FULL_FLOW_MAX_CNY || 5);
-const runIssue1 = process.argv.includes("--issue1") || !process.argv.includes("--issue2");
+const hasExplicitScenario = ["--issue1", "--issue2", "--timeout-repro"].some(flag => process.argv.includes(flag));
+const runIssue1 = process.argv.includes("--issue1") || !hasExplicitScenario;
 const runIssue2 = process.argv.includes("--issue2");
+const runTimeoutRepro = process.argv.includes("--timeout-repro");
 
 mkdirSync(dataDir, { recursive: true });
 copyFileSync(join(root, "build", "desktop-seed", "cases-seed.sqlite"), join(dataDir, "cases.sqlite"));
@@ -107,7 +109,17 @@ const scenarios = [
         researches: [], awards: [], projects: []
       } }
     }
-  ] : [])
+  ] : []),
+  ...(runTimeoutRepro ? [{
+    id: "screening-timeout-regression",
+    expected: "正常的十余秒模型延迟不应被桌面端误判为项目初筛失败",
+    payload: { regions: ["香港"], targetSchools: ["香港大学", "香港中文大学", "香港科技大学", "香港理工大学", "香港城市大学"],
+      fields: ["business", "finance", "accounting"], consent: true, profile: {
+        university: "杭州师范大学", major: "economics", majorName: "金融学",
+        gpaScale: "100", gpaValue: 88, languageTest: "IELTS", language: 7,
+        internships: [], researches: [], awards: [], projects: []
+      } }
+  }] : [])
 ];
 
 assert.ok(scenarios.length, "没有选择全流程验收场景");

@@ -90,9 +90,17 @@ export function selectScreeningCandidates(programmes = [], input = {}, maximum =
     if (entry && !anchors.some(item => item.programme.id === entry.programme.id)) anchors.push(entry);
   };
   for (const field of asStrings(input.fields).map(value => value.toLowerCase())) {
-    add(ranked.filter(entry => fieldMatches(entry.programme, field))
-      .sort((a, b) => Number(b.retrieval.majorMatch) - Number(a.retrieval.majorMatch)
-        || b.retrieval.score - a.retrieval.score || a.programme.id.localeCompare(b.programme.id))[0]);
+    const anchor = ranked.filter(entry => fieldMatches(entry.programme, field))
+      .sort((a, b) => {
+        const priority = entry => {
+          const tags = (entry.programme.focusTags?.length ? entry.programme.focusTags : entry.programme.majorTags || [])
+            .map(tag => String(tag).toLowerCase());
+          return Number(tags[0] === field) * 2 + Number(tags.includes(field));
+        };
+        return priority(b) - priority(a) || Number(b.retrieval.majorMatch) - Number(a.retrieval.majorMatch)
+          || b.retrieval.score - a.retrieval.score || a.programme.id.localeCompare(b.programme.id);
+      })[0];
+    add(anchor);
   }
   for (const school of asStrings(input.targetSchools)) {
     add(ranked.find(entry => entry.programme.university === school || entry.programme.school === school));

@@ -5,8 +5,16 @@ import { fileURLToPath } from 'node:url';
 import {
   assessmentPrompt, screeningPrompt, prepareAgentAnalysis,
   normalizeAgentAssessments, normalizeProbabilityCalibration, mergeProbabilityCalibration, buildAcademicCalibrationRequest,
-  validateProgrammeScreeningResult, finalizeProgrammeScreening, extractLanguageAssessment, unsupportedLanguageClaim, parseModelJson
+  validateProgrammeScreeningResult, finalizeProgrammeScreening, extractLanguageAssessment, unsupportedLanguageClaim, parseModelJson,
+  selectScreeningCandidates
 } from './runtime.mjs';
+
+assert.deepEqual(selectScreeningCandidates([
+  { id: 'accounting', focusTags: ['accounting', 'business'], caseCount: 100, region: '香港' },
+  { id: 'finance', focusTags: ['finance', 'business'], caseCount: 1, region: '香港' },
+  { id: 'business', focusTags: ['business'], caseCount: 1, region: '香港' }
+], { regions: ['香港'], fields: ['business', 'finance', 'accounting'], profile: {} }, 8).slice(0, 3).map(item => item.id),
+['business', 'finance', 'accounting'], 'Each selected direction should receive a core candidate before broad aliases fill the pool');
 
 assert.deepEqual(parseModelJson('{"probabilities":{"p":{"rank":1}}', 'stop'), { probabilities: { p: { rank: 1 } } },
   'Only a completed response missing one final object brace may be recovered');

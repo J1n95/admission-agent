@@ -72,7 +72,7 @@ async function requestAgent(prompt, input, timeoutMs = 60000, thinking = 'disabl
 }
 
 async function runProjectScreening(agent, profile, payload, candidates, fullEvidenceByProgramme = null) {
-  const timeoutMs = Math.min(12000, Math.max(5000, Number(process.env.SCREENING_AI_TIMEOUT_MS || 10000)));
+  const timeoutMs = Math.min(45000, Math.max(15000, Number(process.env.SCREENING_AI_TIMEOUT_MS || 30000)));
   const projects = agent.buildScreeningProjects(candidates, fullEvidenceByProgramme);
   if (!projects.length) throw new Error('第一层候选项目卡片为空');
   const chunks = [];

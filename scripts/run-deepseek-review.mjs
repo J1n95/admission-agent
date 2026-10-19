@@ -35,7 +35,8 @@ async function run() {
     : fullFlowSmoke
       ? [join(root, "eval", "full-flow-smoke.mjs"),
         ...(process.argv.includes("--issue1") ? ["--issue1"] : []),
-        ...(process.argv.includes("--issue2") ? ["--issue2"] : [])]
+        ...(process.argv.includes("--issue2") ? ["--issue2"] : []),
+        ...(process.argv.includes("--timeout-repro") ? ["--timeout-repro"] : [])]
     : [join(root, "eval", "model-ab.mjs"), "--run",
       nonEliteSweep ? "--non-elite-sweep" : schoolTierSmoke ? "--school-tier-smoke" : gpaCompare ? "--gpa-compare" : gpaFiveReview ? "--gpa-five-review" : expandedDiscipline ? "--cross-discipline-expanded" : crossDiscipline ? "--cross-discipline" : "--deepseek-review",
       nonEliteSweep ? "--max-cny=5" : gpaCompare || crossDiscipline || expandedDiscipline ? "--max-cny=2" : "--max-cny=1"];

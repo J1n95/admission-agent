@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { citedEvidenceSnapshots, displayProgramme, runWithConcurrency } from "./legacy-analysis.mjs";
+import { citedEvidenceSnapshots, displayProgramme, resolveScreeningTimeout, runWithConcurrency } from "./legacy-analysis.mjs";
+
+test("project screening allows ordinary provider latency without waiting indefinitely", () => {
+  assert.equal(resolveScreeningTimeout(undefined), 30000);
+  assert.equal(resolveScreeningTimeout(1000), 15000);
+  assert.equal(resolveScreeningTimeout(90000), 45000);
+});
 
 test("review shows only evidence cited by the model and retains source labels", () => {
   const snapshots = citedEvidenceSnapshots([
